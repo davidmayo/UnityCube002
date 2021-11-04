@@ -1355,9 +1355,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   StartingPosition: WWWWWWWWW/GGGGGGGGG/RRRRRRRRR/BBBBBBBBB/OOOOOOOOO/YYYYYYYYY
   DefaultSequence: M'2 U M'2 U2 M'2 U M'2
-  RotationSpeedDegreesPerSecond: 360
-  RotationDelayMilliseconds: 25
-  ShowProjections: 0
+  RotationSpeedDegreesPerSecond: 135
+  RotationDelayMilliseconds: 250
+  ShowProjections: 1
   ProjectionThreshold: 1.5
   ModalPrefab: {fileID: 2519608081080389219, guid: 3f725ede74a8e534fab97ab7922e37e3, type: 3}
   Cube: {fileID: 143489322}

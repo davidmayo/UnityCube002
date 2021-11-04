@@ -249,7 +249,7 @@ public class GameManager : MonoBehaviour
     // Called when "set sequence" button is clicked
     public void SetRotationSequence()
     {
-        currentRotationStartPosition = Cube.GetCanonicalString();
+        currentRotationStartPosition = Cube.CanonicalString;
         //unalteredRotationSequence = new RotationSequence(MoveInputField.text);
         currentRotationSequence = new RotationSequence(MoveInputField.text);
         isCurrentlyReversed = false;
@@ -354,7 +354,6 @@ public class GameManager : MonoBehaviour
 
     private void UpdateCanonicalString()
     {
-        CanonicalInputField.text = Cube.GetCanonicalString();
-
+        CanonicalInputField.text = Cube.CanonicalString;
     }
 }

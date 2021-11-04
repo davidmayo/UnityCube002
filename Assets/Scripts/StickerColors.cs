@@ -2,7 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StickerColors : MonoBehaviour
+/// <summary>
+/// The actual render 3D colors for the cube stickers
+/// </summary>
+public class StickerColors
 {
     // Color source:
     // https://colorswall.com/palette/171

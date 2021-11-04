@@ -4,6 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// The main coordinating class of the program, handling program state, user interface, etc.
+/// Very much a work in progress
+/// -David 11/4/21
+/// </summary>
 public class GameManager : MonoBehaviour
 {
     public enum GameState
@@ -32,7 +37,10 @@ public class GameManager : MonoBehaviour
     public InputField CanonicalInputField;
 
 
+
     // Rotation Sequence stuff
+    [Header("Debug stuff")]
+    public string DebugString;
     private string currentRotationStartPosition;
     //[SerializeField]
     //private RotationSequence unalteredRotationSequence;

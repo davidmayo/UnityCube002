@@ -3,22 +3,43 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
+/// <summary>
+/// Container class to navigate through a sequence of CubeRotations
+/// </summary>
 public class RotationSequence
 {
+    /// <summary>
+    /// The sequence of moves, in order
+    /// </summary>
     public List<CubeRotation> Sequence { get; private set; }
+
+    /// <summary>
+    /// The total number of moves
+    /// </summary>
     public int Count { get => Sequence.Count; }
+    
+    /// <summary>
+    /// The current location in the List
+    /// </summary>
     public int Index { get => index; }
+
+    /// <summary>
+    /// True if there are no more moves in the forward direction
+    /// </summary>
     public bool IsEnd { get => index >= Count; }
+
+    /// <summary>
+    /// True if there are no more moves in the backward direction
+    /// </summary>
     public bool IsBeginning { get => index <= 0; }
 
+    // field for Index property
     private int index;
-    public static RotationSequence EmptySequence
-    {
-        get
-        {
-            return new RotationSequence();
-        }
-    }
+
+    /// <summary>
+    /// The empty sequence
+    /// </summary>
+    public static RotationSequence Empty { get  => new RotationSequence(); }
 
     /// <summary>
     /// Empty sequence by default
@@ -28,27 +49,47 @@ public class RotationSequence
         Sequence = new List<CubeRotation>();
         index = 0;
     }
-    public RotationSequence(IEnumerable<CubeRotation> moves)
+
+    /// <summary>
+    /// Create a RotationSequence from a List or array of CubeRotation objects
+    /// </summary>
+    /// <param name="cubeRotations">The cube rotations</param>
+    public RotationSequence(IEnumerable<CubeRotation> cubeRotations)
     {
-        Sequence = new List<CubeRotation>(moves);
+        Sequence = new List<CubeRotation>(cubeRotations);
         index = 0;
     }
-    public RotationSequence(CubeRotation move)
+
+    /// <summary>
+    /// Create a RotationSequence from a single CubeRotation
+    /// </summary>
+    /// <param name="cubeRotation">The cube rotation</param>
+    public RotationSequence(CubeRotation cubeRotation)
     {
         Sequence = new List<CubeRotation>();
-        Sequence.Add(move);
+        Sequence.Add(cubeRotation);
         index = 0;
     }
+
+    /// <summary>
+    /// Copy constructor
+    /// </summary>
+    /// <param name="rotationSequence">RotationSequence to copy</param>
     public RotationSequence(RotationSequence rotationSequence)
     {
-        Sequence = rotationSequence.Sequence;
+        Sequence = new List<CubeRotation>( rotationSequence.Sequence);
         index = rotationSequence.Index;
     }
-    public RotationSequence(string moves)
+
+    /// <summary>
+    /// Construct a sequence from a string of standard notation moves separated by ' ' chars.
+    /// </summary>
+    /// <param name="sequenceString">A string like "U R' x2 F"</param>
+    public RotationSequence(string sequenceString)
     {
         Sequence = new List<CubeRotation>();
 
-        foreach( string move in moves.Trim().Split(' '))
+        foreach( string move in sequenceString.Trim().Split(' '))
         {
             Sequence.Add(new CubeRotation(move));
         }
@@ -56,42 +97,23 @@ public class RotationSequence
         index = 0;
     }
 
-    //public RotationSequence GetRemainingSequence()
-    //{
-    //    RotationSequence returnValue = new RotationSequence(this);
-    //
-    //    returnValue.Index = this.Index;
-    //    return returnValue;
-    //}
-    //
-    //public RotationSequence GetInverse()
-    //{
-    //    List<CubeRotation> moves = new List<CubeRotation>();
-    //    for (int index = Count - 1; index >= 0; index--)
-    //    {
-    //        moves.Add(Sequence[index].GetInverse());
-    //    }
-    //    RotationSequence returnValue = new RotationSequence(moves);
-    //    returnValue.Index = Count - Index - 1;
-    //    return returnValue;
-    //}
-    //public RotationSequence GetInverseSoFar()
-    //{
-    //    return GetInverse();
-    //}
-
+    /// <summary>
+    /// Get the next CubeRotation in the forward direction and move index, if possible. Return null if not possible.
+    /// </summary>
+    /// <returns>The next CubeRotation in the sequence</returns>
     public CubeRotation GetForward()
     {
         if (this.index >= Count)
             return null;
 
-        Debug.Log($"GetNextRotation() BEFORE INCREMENTING index={index}   Count={Count}\n{this.ToString()}");
         this.index++;
-
-        Debug.Log($"GetNextRotation() AFTER INCREMENTING index={index}   Count={Count}\n{this.ToString()}");
         return Sequence[this.index - 1];
     }
 
+    /// <summary>
+    /// Peek the next CubeRotation in the forward direction, if possible. Index is not changed. Return null if not possible.
+    /// </summary>
+    /// <returns>The next CubeRotation in the sequence</returns>
     public CubeRotation PeekForward()
     {
         if (this.index >= Count)
@@ -100,6 +122,10 @@ public class RotationSequence
         return Sequence[this.index];
     }
 
+    /// <summary>
+    /// Get the INVERSE of the next CubeRotation in the backward direction and move index, if possible. Return null if not possible.
+    /// </summary>
+    /// <returns>The INVERSE of the previous CubeRotation in the sequence</returns>
     public CubeRotation GetBackward()
     {
         if (Count == 0)
@@ -111,6 +137,10 @@ public class RotationSequence
         return Sequence[Index].GetInverse();
     }
 
+    /// <summary>
+    /// Get the INVERSE of the next CubeRotation in the backward direction, if possible. Return null if not possible. Index is not changed.
+    /// </summary>
+    /// <returns>The INVERSE of the previous CubeRotation in the sequence</returns>
     public CubeRotation PeekBackward()
     {
         if (Count == 0)
@@ -121,6 +151,10 @@ public class RotationSequence
         return Sequence[index - 1].GetInverse();
     }
 
+    /// <summary>
+    /// Return all the properties as a string.
+    /// </summary>
+    /// <returns></returns>
     public override string ToString()
     {
         string returnValue = "";
@@ -135,11 +169,17 @@ public class RotationSequence
         return returnValue;
     }
 
+    /// <summary>
+    /// Move Index to the end of the sequence
+    /// </summary>
     public void MoveToEnd()
     {
         index = Count - 1;
     }
 
+    /// <summary>
+    /// Move Index to the beginning of the sequence
+    /// </summary>
     public void MoveToBeginning()
     {
         index = 0;

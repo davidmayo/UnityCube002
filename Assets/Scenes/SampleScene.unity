@@ -1357,12 +1357,13 @@ MonoBehaviour:
   DefaultSequence: M'2 U M'2 U2 M'2 U M'2
   RotationSpeedDegreesPerSecond: 135
   RotationDelayMilliseconds: 250
-  ShowProjections: 1
+  ShowProjections: 0
   ProjectionThreshold: 1.5
   ModalPrefab: {fileID: 2519608081080389219, guid: 3f725ede74a8e534fab97ab7922e37e3, type: 3}
   Cube: {fileID: 143489322}
   MoveInputField: {fileID: 492704637}
   CanonicalInputField: {fileID: 208284687}
+  DebugString: 
   isPaused: 0
   rotationSequenceInProgress: 0
   isCurrentlyReversed: 0

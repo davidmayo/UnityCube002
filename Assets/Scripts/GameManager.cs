@@ -274,6 +274,9 @@ public class GameManager : MonoBehaviour
         isPaused = false;
         isCurrentlyReversed = false;
         StartRotationSequence();
+
+        LogicalCube.Square test = LogicalCube.Square.FUR;
+        Debug.Log($"TEST: square is {test}");
     }
 
     public void ReverseSequenceFromHere()

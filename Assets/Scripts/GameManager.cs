@@ -255,12 +255,33 @@ public class GameManager : MonoBehaviour
     }
 
     // Called when "set sequence" button is clicked
+    // Or "Update" is clicked
     public void SetRotationSequence()
     {
         currentRotationStartPosition = Cube.CanonicalString;
         //unalteredRotationSequence = new RotationSequence(MoveInputField.text);
         currentRotationSequence = new RotationSequence(MoveInputField.text);
         isCurrentlyReversed = false;
+    }
+
+    public void UpdateButtonClicked()
+    {
+        Debug.Log("Update button clicked");
+        Cube.SetCubeFromCanonicalString(CanonicalInputField.text);
+        SetRotationSequence();
+    }
+
+    public void GenerateSolutionButtonClicked()
+    {
+        Debug.Log("Generate solution button clicked");
+        LogicalCube.Cube logicalCube = new LogicalCube.Cube(Cube.CanonicalString);
+        LogicalCube.Solution solution = new LogicalCube.Solution(logicalCube);
+
+        MoveInputField.text = solution.ToString();
+        SetRotationSequence();
+        
+
+        Debug.Log($"SOLUTION length: {solution.moveList.Count}    ToString: {solution}");
     }
 
     public void PlaySequenceFromHere()
@@ -276,7 +297,15 @@ public class GameManager : MonoBehaviour
         StartRotationSequence();
 
         LogicalCube.Square test = LogicalCube.Square.FUR;
+        LogicalCube.Move move = new LogicalCube.Move("U2");
+        LogicalCube.MoveSequence seq = new LogicalCube.MoveSequence("M2");
+        LogicalCube.Cube logicalCube = new LogicalCube.Cube();
+        logicalCube.MakeMove(move);
         Debug.Log($"TEST: square is {test}");
+        Debug.Log($"TEST: move is {move}");
+        Debug.Log($"TEST: seq is {seq}");
+        Debug.Log($"TEST: logicalCube is {logicalCube}");
+
     }
 
     public void ReverseSequenceFromHere()

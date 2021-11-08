@@ -32,9 +32,11 @@ public class GameManager : MonoBehaviour
 
     [Header("References")]
     public GameObject ModalPrefab;
-    public Cube Cube;
+    public PhysicalCube.Cube Cube;
     public InputField MoveInputField;
     public InputField CanonicalInputField;
+    public List<Button> colorButtons;
+    public Image CurrentColorDisplay;
 
 
 
@@ -45,7 +47,7 @@ public class GameManager : MonoBehaviour
     //[SerializeField]
     //private RotationSequence unalteredRotationSequence;
     [SerializeField]
-    private RotationSequence currentRotationSequence;
+    private PhysicalCube.RotationSequence currentRotationSequence;
     [SerializeField]
     private bool isPaused;
 
@@ -53,22 +55,121 @@ public class GameManager : MonoBehaviour
     private bool rotationSequenceInProgress;
     [SerializeField]
     bool isCurrentlyReversed = false;
+    [SerializeField]
+    bool isMidRotationSequence = false;
+
+    [Header("User input mode")]
+    [SerializeField]
+    private Color currentColor;
 
     // Start is called before the first frame update
     void Start()
     {
-        currentRotationSequence = new RotationSequence("");
+        currentRotationSequence = new PhysicalCube.RotationSequence("");
         currentRotationStartPosition = StartingPosition;
         rotationSequenceInProgress = false;
         isPaused = false;
 
         Cube.SetCubeFromCanonicalString(StartingPosition);
-        Cube.SetCubeFromCanonicalString("GGWOYYGWY/RGBWRYOGW/ROOBGRRRB/GOOGOYRRY/YWYRBBBBW/BYGOWWOBW");
+        //Cube.SetCubeFromCanonicalString("GGWOYYGWY/RGBWRYOGW/ROOBGRRRB/GOOGOYRRY/YWYRBBBBW/BYGOWWOBW");
         SetGameState(GameState.FreeRotation);
 
         MoveInputField.text = DefaultSequence;
-        MoveInputField.text = "x2 y D D D F2 y D F2 y y y F D F' y y D F2 y D D D D R F' R' x2 R U R' U' R U R' U' R U R' U' R U R' U' R U R' U' y y y R U R' U' R U R' U' y y y U U R U R' U' R U R' U' R U R' U' y y y U U R U R' U' R U R' U' R U R' U' R U R' U' R U R' U' y y y U2 F' U' F U R U R' y y U2 F' U' F U R U R' y U U U2 F' U' F U R U R' y y F R U R' U' F' F R U R' U' F' U U U U y R U R' U R U2 R' U U R U' L' U R' U' L y U R U' L' U R' U' L x2 y y y y R U R' U' R U R' U' D R U R' U' R U R' U' D R U R' U' R U R' U' D D x2 y2 z2 x2 y2 z2";
+        //MoveInputField.text = "x2 y D D D F2 y D F2 y y y F D F' y y D F2 y D D D D R F' R' x2 R U R' U' R U R' U' R U R' U' R U R' U' R U R' U' y y y R U R' U' R U R' U' y y y U U R U R' U' R U R' U' R U R' U' y y y U U R U R' U' R U R' U' R U R' U' R U R' U' R U R' U' y y y U2 F' U' F U R U R' y y U2 F' U' F U R U R' y U U U2 F' U' F U R U R' y y F R U R' U' F' F R U R' U' F' U U U U y R U R' U R U2 R' U U R U' L' U R' U' L y U R U' L' U R' U' L x2 y y y y R U R' U' R U R' U' D R U R' U' R U R' U' D R U R' U' R U R' U' D D x2 y2 z2 x2 y2 z2";
         UpdateCanonicalString();
+
+        foreach( Button button in colorButtons)
+        {
+            button.image.color = PhysicalCube.StickerColors.BlueSticker;
+            Color target;
+            switch (button.name)
+            {
+                case "ColorWhiteButton":
+                    target = PhysicalCube.StickerColors.WhiteSticker;
+                    break;
+                case "ColorYellowButton":
+                    target = PhysicalCube.StickerColors.YellowSticker;
+                    break;
+
+                case "ColorGreenButton":
+                    target = PhysicalCube.StickerColors.GreenSticker;
+                    break;
+                case "ColorBlueButton":
+                    target = PhysicalCube.StickerColors.BlueSticker;
+                    break;
+
+                case "ColorRedButton":
+                    target = PhysicalCube.StickerColors.RedSticker;
+                    break;
+                case "ColorOrangeButton":
+                    target = PhysicalCube.StickerColors.OrangeSticker;
+                    break;
+
+                default:
+                    target = PhysicalCube.StickerColors.UnknownSticker;
+                    break;
+            }
+            button.image.color = target;
+        }
+
+        SetColor("unknown");
+    }
+
+    public void SetCube(string newString )
+    {
+        if (newString.Trim().ToUpper() == "SOLVED")
+            Cube.SetCubeFromCanonicalString("WWWWWWWWW/GGGGGGGGG/RRRRRRRRR/BBBBBBBBB/OOOOOOOOO/YYYYYYYYY");
+        else if( newString.Trim().ToUpper() == "BLANK")
+            Cube.SetCubeFromCanonicalString("XXXXXXXXX/XXXXXXXXX/XXXXXXXXX/XXXXXXXXX/XXXXXXXXX/XXXXXXXXX");
+        else if (newString.Trim().ToUpper() == "CENTERS")
+            Cube.SetCubeFromCanonicalString("XXXXWXXXX/XXXXGXXXX/XXXXRXXXX/XXXXBXXXX/XXXXOXXXX/XXXXYXXXX");
+        else
+        {
+            try
+            {
+                Cube.SetCubeFromCanonicalString(newString);
+            }
+            catch( Exception )
+            {
+                Debug.Log($"Invalid canonical string {newString}. Setting to blank instead");
+                Cube.SetCubeFromCanonicalString("XXXXXXXXX/XXXXXXXXX/XXXXXXXXX/XXXXXXXXX/XXXXXXXXX/XXXXXXXXX");
+            }
+        }
+
+        UpdateCanonicalString();
+    }
+
+    public void SetColor(string color = "")
+    {
+        switch( color )
+        {
+            case "white":
+                currentColor = PhysicalCube.StickerColors.WhiteSticker;
+                break;
+            case "yellow":
+                currentColor = PhysicalCube.StickerColors.YellowSticker;
+                break;
+
+            case "green":
+                currentColor = PhysicalCube.StickerColors.GreenSticker;
+                break;
+            case "blue":
+                currentColor = PhysicalCube.StickerColors.BlueSticker;
+                break;
+
+            case "red":
+                currentColor = PhysicalCube.StickerColors.RedSticker;
+                break;
+            case "orange":
+                currentColor = PhysicalCube.StickerColors.OrangeSticker;
+                break;
+
+            default:
+                currentColor = PhysicalCube.StickerColors.UnknownSticker;
+                break;
+        }
+
+        CurrentColorDisplay.color = currentColor;
     }
 
     private void FinishRotation()
@@ -93,24 +194,24 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void StartRotationSequence(RotationSequence newSequence )
-    {
-        if (rotationSequenceInProgress || !Cube.ReadyToRotate)
-            return;
-        if (newSequence is null || newSequence.Count == 0)
-        {
-            rotationSequenceInProgress = false;
-            //currentRotationSequence = RotationSequence.EmptySequence;
-            return;
-        }
-        currentRotationSequence = newSequence;
-        isPaused = false;
-        StartRotationSequence();
-    }
+    //private void StartRotationSequence(PhysicalCube.RotationSequence newSequence )
+    //{
+    //    if (rotationSequenceInProgress || !Cube.IsReadyToRotate)
+    //        return;
+    //    if (newSequence is null || newSequence.Count == 0)
+    //    {
+    //        rotationSequenceInProgress = false;
+    //        //currentRotationSequence = RotationSequence.EmptySequence;
+    //        return;
+    //    }
+    //    currentRotationSequence = newSequence;
+    //    isPaused = false;
+    //    StartRotationSequence();
+    //}
 
     private void StartRotationSequence()
     {
-        if (rotationSequenceInProgress || !Cube.ReadyToRotate)
+        if (rotationSequenceInProgress || !Cube.IsReadyToRotate)
             return;
 
         if (currentRotationSequence is null || currentRotationSequence.Count == 0)
@@ -129,7 +230,8 @@ public class GameManager : MonoBehaviour
             if (!currentRotationSequence.IsBeginning)
             {
                 rotationSequenceInProgress = true;
-                Cube.StartRotation(currentRotationSequence.GetBackward());
+                RotateCube(currentRotationSequence.GetBackward());
+                //Cube.StartRotation(currentRotationSequence.GetBackward());
             }
         }
 
@@ -139,7 +241,8 @@ public class GameManager : MonoBehaviour
             if (!currentRotationSequence.IsEnd)
             {
                 rotationSequenceInProgress = true;
-                Cube.StartRotation(currentRotationSequence.GetForward());
+                RotateCube(currentRotationSequence.GetForward());
+                //Cube.StartRotation(currentRotationSequence.GetForward());
             }
         }
 
@@ -147,16 +250,35 @@ public class GameManager : MonoBehaviour
         
     }
 
+    private void RotateCube(PhysicalCube.CubeRotation rotation)
+    {
+        StartCoroutine(RotateCubeCoroutine(rotation));
+    }
+    IEnumerator RotateCubeCoroutine(PhysicalCube.CubeRotation rotation)
+    {
+        // Wait until cube is ready
+        while ( !Cube.IsReadyToRotate )
+        {
+            yield return null;
+        }
+
+        // Do the rotation coroutine
+        yield return StartCoroutine(Cube.RotateCoroutine(rotation));
+
+        // Rotation is finished
+        UpdateCanonicalString();
+    }
     private void ContinueRotationSequence()
     {
         if (isPaused)
             return;
         if (!rotationSequenceInProgress)
             return;
-        if (!Cube.ReadyToRotate)
+        if (!Cube.IsReadyToRotate)
             return;
 
         FinishRotation();
+
         // Move backwards
         if( isCurrentlyReversed )
         {
@@ -166,7 +288,8 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                Cube.StartRotation(currentRotationSequence.GetBackward());
+                RotateCube(currentRotationSequence.GetBackward());
+                //Cube.StartRotation(currentRotationSequence.GetBackward());
             }
         }
 
@@ -179,7 +302,8 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                Cube.StartRotation(currentRotationSequence.GetForward());
+                RotateCube(currentRotationSequence.GetForward());
+                //Cube.StartRotation(currentRotationSequence.GetForward());
             }
         }
 
@@ -207,29 +331,46 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        switch (this.State)
+        if (Input.GetMouseButtonDown(0))
         {
-            case GameState.StickerInput:
-                ProcessStickerInput();
-                break;
-            case GameState.SolutionView:
-                ProcessSolutionView();
-                break;
-            case GameState.FreeRotation:
-                ProcessFreeRotation();
-                break;
-            default:
-                break;
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        
+            if (Physics.Raycast(ray, out hit))
+            {
+                GameObject hitObject = hit.transform.gameObject;
+        
+                if (hitObject.CompareTag("Sticker") || hitObject.CompareTag("Projection"))
+                {
+                    Cube.SetStickerColor(hitObject, currentColor);
+                }
+            }
+            UpdateCanonicalString();
         }
+        //UpdateCanonicalString();
+        //switch (this.State)
+        //{
+        //    case GameState.StickerInput:
+        //        ProcessStickerInput();
+        //        break;
+        //    case GameState.SolutionView:
+        //        ProcessSolutionView();
+        //        break;
+        //    case GameState.FreeRotation:
+        //        ProcessFreeRotation();
+        //        break;
+        //    default:
+        //        break;
+        //}
 
+        ProcessFreeRotation();
+
+        // Set Cube adjustable parameters
+        // Do this every frame only for debugging
         Cube.DegreesPerSecond = this.RotationSpeedDegreesPerSecond;
         Cube.DelayMilliseconds = this.RotationDelayMilliseconds;
         Cube.ProjectionVisibilityThreshold = this.ProjectionThreshold;
         Cube.ShowProjections = this.ShowProjections;
-
-        if( ShowProjections )
-        {
-        }
     }
 
     void SetGameState( GameState newState )
@@ -260,7 +401,7 @@ public class GameManager : MonoBehaviour
     {
         currentRotationStartPosition = Cube.CanonicalString;
         //unalteredRotationSequence = new RotationSequence(MoveInputField.text);
-        currentRotationSequence = new RotationSequence(MoveInputField.text);
+        currentRotationSequence = new PhysicalCube.RotationSequence(MoveInputField.text);
         isCurrentlyReversed = false;
     }
 
@@ -286,7 +427,7 @@ public class GameManager : MonoBehaviour
 
     public void PlaySequenceFromHere()
     {
-        if (!Cube.ReadyToRotate || rotationSequenceInProgress)
+        if (!Cube.IsReadyToRotate || rotationSequenceInProgress)
         {
             return;
         }
@@ -311,7 +452,7 @@ public class GameManager : MonoBehaviour
     public void ReverseSequenceFromHere()
     {
 
-        if (!Cube.ReadyToRotate || rotationSequenceInProgress)
+        if (!Cube.IsReadyToRotate || rotationSequenceInProgress)
         {
             return;
         }
@@ -324,7 +465,7 @@ public class GameManager : MonoBehaviour
 
     public void ResetSequence()
     {
-        if (!Cube.ReadyToRotate)
+        if (!Cube.IsReadyToRotate)
         {
             return;
         }
@@ -349,7 +490,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        if (!Cube.ReadyToRotate)
+        if (!Cube.IsReadyToRotate)
         {
             return;
         }
@@ -357,7 +498,8 @@ public class GameManager : MonoBehaviour
         UpdateCanonicalString();
         //CanonicalInputField.text = Cube.GetCanonicalString();
         isPaused = false;
-        Cube.StartRotation(currentRotationSequence.GetForward());
+        RotateCube(currentRotationSequence.GetForward());
+        //Cube.StartRotation(currentRotationSequence.GetForward());
     }
 
     public void UndoCurrentMove()
@@ -367,7 +509,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        if (!Cube.ReadyToRotate)
+        if (!Cube.IsReadyToRotate)
         {
             return;
         }
@@ -376,7 +518,8 @@ public class GameManager : MonoBehaviour
         //CanonicalInputField.text = Cube.GetCanonicalString();
         //Cube.StartRotationSequence(null);
         isPaused = false;
-        Cube.StartRotation(currentRotationSequence.GetBackward());
+        RotateCube(currentRotationSequence.GetBackward());
+        //Cube.StartRotation(currentRotationSequence.GetBackward());
     }
 
     private void ProcessFreeRotation()
@@ -394,6 +537,7 @@ public class GameManager : MonoBehaviour
 
     private void UpdateCanonicalString()
     {
-        CanonicalInputField.text = Cube.CanonicalString;
+        if( !string.IsNullOrWhiteSpace(Cube.CanonicalString))
+            CanonicalInputField.text = Cube.CanonicalString;
     }
 }

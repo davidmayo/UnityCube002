@@ -46,6 +46,7 @@ namespace LogicalCube
         public char this[Square key]
         {
             get => squares[key.Index];
+            set => squares[key.Index] = value;
         }
 
         /// <summary>
@@ -181,16 +182,26 @@ namespace LogicalCube
         /// <returns>The Square where "G" is</returns>
         private Square FindCenterPiece(string pieceString)
         {
+            List<Square> foundLocations = new List<Square>();
             List<Square> centerSquares = Square.AllCenterSquares;
 
             foreach (Square centerSquare in centerSquares)
             {
                 if (squares[centerSquare] == pieceString[0])
-                    return centerSquare;
+                    foundLocations.Add(centerSquare);
             }
 
-            // If we didn't find it in the loop, throw an exception
-            throw new Exception("Could not find piece [" + pieceString + "].");
+            // If we found one, then all is good.
+            if (foundLocations.Count == 1)
+                return foundLocations[0];
+
+            // If we didn't find it in the loop, return null
+            else if (foundLocations.Count == 0)
+                return null;
+
+            // If we found more than one, throw an exception, Since there's an invlid cube.
+            else
+                throw new Exception("Found multiples of [" + pieceString + "] found " + foundLocations.Count + ".");
         }
 
         /// <summary>

@@ -339,13 +339,37 @@ public class GameManager : MonoBehaviour
             if (Physics.Raycast(ray, out hit))
             {
                 GameObject hitObject = hit.transform.gameObject;
+
+                // Only want to take any action if the thing is visible
+                // This will prevent clicking on invisible projections:
+                MeshRenderer meshRenderer = hitObject.GetComponent<MeshRenderer>();
+
+                float alphaValue = meshRenderer.material.color.a;
         
-                if (hitObject.CompareTag("Sticker") || hitObject.CompareTag("Projection"))
+                if ( (alphaValue > .99f) &&
+                     (hitObject.CompareTag("Sticker") || hitObject.CompareTag("Projection")))
                 {
                     Cube.SetStickerColor(hitObject, currentColor);
+                    UpdateCanonicalString();
+
+                    try
+                    {
+                        string canon = Cube.CanonicalString;
+                        Debug.Log($"canon=[{canon}]");
+                        string forcedCube = LogicalCube.CubeValidator.GetForcedCube(Cube.CanonicalString);
+                        Debug.Log($"forcedCube=[{forcedCube}]");
+
+                        Cube.SetCubeFromCanonicalString(forcedCube);
+                    }
+                    catch (Exception exc)
+                    {
+                        Debug.Log($"EXCEPTION: {exc}");
+                    }
                 }
             }
             UpdateCanonicalString();
+
+            
         }
         //UpdateCanonicalString();
         //switch (this.State)
@@ -425,6 +449,12 @@ public class GameManager : MonoBehaviour
         Debug.Log($"SOLUTION length: {solution.moveList.Count}    ToString: {solution}");
     }
 
+
+    public void FlipCube()
+    {
+        currentRotationSequence = new PhysicalCube.RotationSequence("x2 y'");
+        PlaySequenceFromHere();
+    }
     public void PlaySequenceFromHere()
     {
         if (!Cube.IsReadyToRotate || rotationSequenceInProgress)

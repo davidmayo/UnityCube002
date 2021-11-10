@@ -9,9 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6788528828891867792}
-  - component: {fileID: 7576567008574739102}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: CubeBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -57,25 +56,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7576567008574739102
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4276080806288624166}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 306c05dd910e6f9498b8aeea41f3c0fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowProjections: 0
-  currentColor: {r: 0, g: 0, b: 0, a: 0}
-  canonicalInputField: {fileID: 0}
-  moveInputField: {fileID: 0}
-  DegreesPerSecond: 135
-  DelayMilliseconds: 100
-  ProjectionVisibilityThreshold: 1.5
 --- !u!1001 &1921682560731682228
 PrefabInstance:
   m_ObjectHideFlags: 0

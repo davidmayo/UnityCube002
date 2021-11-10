@@ -32,7 +32,6 @@ public class GameManager : MonoBehaviour
 
     [Header("References")]
     public GameObject ModalPrefab;
-    public GameObject CubePrefab;
     public PhysicalCube.Cube Cube;
     public InputField MoveInputField;
     public InputField CanonicalInputField;
@@ -316,29 +315,18 @@ public class GameManager : MonoBehaviour
     public void HelpButtonClicked()
     {
         Debug.Log($"Help Button Clicked {this}");
+        Instantiate(ModalPrefab);
         Canvas canvas = ModalPrefab.GetComponent<Canvas>();
 
-        Debug.Log($"Old cube is {Cube}");
 
-        GameObject.Destroy(Cube.gameObject);
-
-        GameObject cubeObject = GameObject.Instantiate(CubePrefab);
-
-        
-        Cube = cubeObject.GetComponentInChildren<PhysicalCube.Cube>();
-        Debug.Log($"new Cube is {Cube}");
-        Cube.InitializeStuff();
-
-        //Instantiate(ModalPrefab);
-
-        //canvas.enabled = false;
+        canvas.enabled = false;
 
         // Code to set the modal stuff goes here
 
-        //canvas.enabled = true;
+        canvas.enabled = true;
     }
 
-
+    
 
     // Update is called once per frame
     void Update()

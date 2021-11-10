@@ -109,19 +109,6 @@ namespace PhysicalCube
             CanonicalString = loc.GetCanonicalString();
         }
 
-        public void InitializeStuff()
-        {
-            Debug.Log($"InitializeStuff() called on {this}");
-            // Initialize stuff
-            ShowProjections = false;
-            loc = new CubeLocator();
-            currentColor = Color.white;
-            //NextRotationTime = DateTime.Now.AddMilliseconds(DelayMilliseconds);
-            IsReadyToRotate = true;
-
-            CanonicalString = loc.GetCanonicalString();
-        }
-
         /// <summary>
         /// Run every frame update
         /// </summary>
@@ -147,7 +134,7 @@ namespace PhysicalCube
 
             // Update projection visibility every frame, because the user could change the
             // setting at any point
-            //UpdateProjectionOpacity();
+            UpdateProjectionOpacity();
         }
 
         /// <summary>

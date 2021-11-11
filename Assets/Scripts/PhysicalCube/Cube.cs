@@ -363,12 +363,17 @@ namespace PhysicalCube
                 // (There really doesn't seem to be an efficient way to select a GameObject's DIRECT child.)
                 foreach (MeshRenderer meshRenderer in gameObject.GetComponentsInChildren<MeshRenderer>())
                 {
+                    // We want to get the RGB values from the desired color and the A value from the existing color.
+                    // This fixes the "phantom projection" bug that sometimes happens during user input
                     if (meshRenderer.name.Contains("projection"))
+                    {
+                        color.a = meshRenderer.material.color.a;
                         meshRenderer.material.color = color;
+                    }
                 }
             }
 
-            // If the object is a sticker, we need to set the object's color
+            // If the object is a Projection, we need to set the object's color
             // and set the object's parent's color.
             else if (gameObject.CompareTag("Projection"))
             {
@@ -384,7 +389,12 @@ namespace PhysicalCube
                 }
 
                 // Set projection color.
-                gameObject.GetComponent<MeshRenderer>().material.color = color;
+                MeshRenderer meshRendererProjection = gameObject.GetComponent<MeshRenderer>();
+
+                // We want to get the RGB values from the desired color and the A value from the existing color.
+                // This fixes the "phantom projection" bug that sometimes happens during user input
+                color.a = meshRendererProjection.material.color.a;
+                meshRendererProjection.material.color = color;
             }
 
             CanonicalString = loc.GetCanonicalString();

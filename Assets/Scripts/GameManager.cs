@@ -315,15 +315,15 @@ public class GameManager : MonoBehaviour
     public void HelpButtonClicked()
     {
         Debug.Log($"Help Button Clicked {this}");
-        Instantiate(ModalPrefab);
-        Canvas canvas = ModalPrefab.GetComponent<Canvas>();
 
-
-        canvas.enabled = false;
-
-        // Code to set the modal stuff goes here
-
-        canvas.enabled = true;
+        Cube.SetCubeFromCanonicalString("WWWWWWWWW/GGGGGGGGG/RRRRRRRRR/BBBBBBBBB/OOOOOOOOO/YYYYYYYYY");
+        
+        
+        //Instantiate(ModalPrefab);
+        //Canvas canvas = ModalPrefab.GetComponent<Canvas>();
+        //canvas.enabled = false;
+        //// Code to set the modal stuff goes here
+        //canvas.enabled = true;
     }
 
     
@@ -360,6 +360,7 @@ public class GameManager : MonoBehaviour
                         Debug.Log($"forcedCube=[{forcedCube}]");
 
                         Cube.SetCubeFromCanonicalString(forcedCube);
+                        UpdateCanonicalString();
                     }
                     catch (Exception exc)
                     {
@@ -367,7 +368,7 @@ public class GameManager : MonoBehaviour
                     }
                 }
             }
-            UpdateCanonicalString();
+            
 
             
         }
@@ -423,15 +424,25 @@ public class GameManager : MonoBehaviour
     // Or "Update" is clicked
     public void SetRotationSequence()
     {
+        SetRotationSequence(MoveInputField.text);
+        //currentRotationStartPosition = Cube.CanonicalString;
+        ////unalteredRotationSequence = new RotationSequence(MoveInputField.text);
+        //currentRotationSequence = new PhysicalCube.RotationSequence(MoveInputField.text);
+        //isCurrentlyReversed = false;
+    }
+
+    public void SetRotationSequence(string moveSequenceString)
+    {
         currentRotationStartPosition = Cube.CanonicalString;
         //unalteredRotationSequence = new RotationSequence(MoveInputField.text);
-        currentRotationSequence = new PhysicalCube.RotationSequence(MoveInputField.text);
+        currentRotationSequence = new PhysicalCube.RotationSequence(moveSequenceString);
         isCurrentlyReversed = false;
     }
 
     public void UpdateButtonClicked()
     {
         Debug.Log("Update button clicked");
+        Debug.Log(CanonicalInputField.text);
         Cube.SetCubeFromCanonicalString(CanonicalInputField.text);
         SetRotationSequence();
     }

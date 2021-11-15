@@ -11,12 +11,12 @@ namespace LogicalCube
         private List<Move> moves;
         public int Length => moves.Count;
 
-        public MoveSequence(string moves)
+        public MoveSequence(string moves, string captionHeader="", string captionText="")
         {
             this.moves = new List<Move>();
             foreach( var move in moves.Split(' '))
             {
-                this.moves.Add(new Move(move));
+                this.moves.Add(new Move(move,captionHeader,captionText));
             }
         }
 

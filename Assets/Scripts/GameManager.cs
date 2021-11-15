@@ -37,7 +37,8 @@ public class GameManager : MonoBehaviour
     public InputField CanonicalInputField;
     public List<Button> colorButtons;
     public Image CurrentColorDisplay;
-
+    public Text TutorialHeader;
+    public Text TutorialContent;
 
 
     // Rotation Sequence stuff
@@ -230,7 +231,9 @@ public class GameManager : MonoBehaviour
             if (!currentRotationSequence.IsBeginning)
             {
                 rotationSequenceInProgress = true;
-                RotateCube(currentRotationSequence.GetBackward());
+                var nextRotation = currentRotationSequence.GetBackward();
+                Debug.Log($"Starting rotation {nextRotation} HEADER: {nextRotation.CaptionHeaderText} BODY: {nextRotation.CaptionBodyText}");
+                RotateCube(nextRotation);
                 //Cube.StartRotation(currentRotationSequence.GetBackward());
             }
         }
@@ -241,7 +244,9 @@ public class GameManager : MonoBehaviour
             if (!currentRotationSequence.IsEnd)
             {
                 rotationSequenceInProgress = true;
-                RotateCube(currentRotationSequence.GetForward());
+                var nextRotation = currentRotationSequence.GetForward();
+                Debug.Log($"Starting rotation {nextRotation} HEADER: {nextRotation.CaptionHeaderText} BODY: {nextRotation.CaptionBodyText}");
+                RotateCube(nextRotation);
                 //Cube.StartRotation(currentRotationSequence.GetForward());
             }
         }
@@ -262,6 +267,27 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
+        // Ready to start the rotation
+        Debug.Log($"Starting rotation {rotation} HEADER: {rotation.CaptionHeaderText} BODY: {rotation.CaptionBodyText}");
+
+        // Update the caption
+        if (!string.IsNullOrWhiteSpace(rotation.CaptionHeaderText))
+        {
+            TutorialHeader.text = rotation.CaptionHeaderText;
+        }
+        else
+        {
+            TutorialHeader.text = rotation.MoveString;
+        }
+
+        if (!string.IsNullOrWhiteSpace(rotation.CaptionBodyText))
+        {
+            TutorialContent.text = rotation.CaptionBodyText;
+        }
+        else
+        {
+            TutorialContent.text = "Do move: " + rotation.MoveString;
+        }
         // Do the rotation coroutine
         yield return StartCoroutine(Cube.RotateCoroutine(rotation));
 
@@ -431,6 +457,14 @@ public class GameManager : MonoBehaviour
         //isCurrentlyReversed = false;
     }
 
+    public void SetRotationSequence(PhysicalCube.RotationSequence solutionSequence)
+    {
+        currentRotationStartPosition = Cube.CanonicalString;
+        //unalteredRotationSequence = new RotationSequence(MoveInputField.text);
+        currentRotationSequence = solutionSequence;
+        isCurrentlyReversed = false;
+    }
+
     public void SetRotationSequence(string moveSequenceString)
     {
         currentRotationStartPosition = Cube.CanonicalString;
@@ -453,8 +487,22 @@ public class GameManager : MonoBehaviour
         LogicalCube.Cube logicalCube = new LogicalCube.Cube(Cube.CanonicalString);
         LogicalCube.Solution solution = new LogicalCube.Solution(logicalCube);
 
+
+        List<PhysicalCube.CubeRotation> solutionSteps = new List<PhysicalCube.CubeRotation>();
+
+        // Create new CubeRotation for each move, preserving the captions
+        foreach( var move in solution.moveList )
+        {
+            solutionSteps.Add(new PhysicalCube.CubeRotation(move.MoveString, move.CaptionHeader, move.CaptionText));
+        }
+
+        PhysicalCube.RotationSequence solutionSequence = new PhysicalCube.RotationSequence(solutionSteps);
+
         MoveInputField.text = solution.ToString();
-        SetRotationSequence();
+
+        Debug.Log($"Solution sequence: {solutionSequence}");
+
+        SetRotationSequence(solutionSequence);
         
 
         Debug.Log($"SOLUTION length: {solution.moveList.Count}    ToString: {solution}");

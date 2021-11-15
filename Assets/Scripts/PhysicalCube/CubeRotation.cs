@@ -51,11 +51,18 @@ namespace PhysicalCube
         /// </summary>
         public string MoveString { get; private set; }
 
+        public string CaptionHeaderText { get; private set; }
+        public string CaptionBodyText { get; private set; }
+
+
         /// <summary>
         /// Construct a new rotation from a standard notation string
         /// </summary>
         /// <param name="moveString">A move in standard notation, or 0 for a null move</param>
-        public CubeRotation(string moveString)
+        public CubeRotation(string moveString) : this(moveString, "", "")
+        {
+        }
+        public CubeRotation(string moveString, string captionHeaderText, string captionBodyText)
         {
             // Null move is special
             if (string.IsNullOrEmpty(moveString) || moveString == "0")
@@ -156,6 +163,8 @@ namespace PhysicalCube
                     RotationAxis = Vector3.zero;
                     throw new UnityException("Unable to determine RotationAxis for FaceLike " + FaceLike);
             }
+            CaptionBodyText = captionBodyText;
+            CaptionHeaderText = captionHeaderText;
         }
 
         /// <summary>

@@ -16,6 +16,10 @@ namespace LogicalCube
         private List<Square[]> cycles;
         //private string moveString;
 
+        public string CaptionHeader { get; private set; }
+        public string CaptionText { get; private set; }
+        public string MoveString { get; private set; }
+
         private List<char> validAxes = new List<char> {
             'U', 'D', 'L', 'R', 'F', 'B',   // Face turns
             'M', 'E', 'S',                  // Slice turns
@@ -124,9 +128,9 @@ namespace LogicalCube
             },
         };
 
-        public Move( string move )
+        public Move( string move, string captionHeader = "", string captionText = "" )
         {
-            //moveString = move;
+            MoveString = move;
 
             if( string.IsNullOrEmpty(move) ||
                 move[0] == '0' )
@@ -160,6 +164,9 @@ namespace LogicalCube
 
             cycles = new List<Square[]>();
             CreateCycles();
+
+            CaptionHeader = captionHeader;
+            CaptionText = captionText;
         }
 
         public Move(char axis, int rotation)

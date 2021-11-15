@@ -698,17 +698,17 @@ namespace LogicalCube
             _cube.MakeMove(move);
         }
 
-        private void AddMoveToSolution(MoveSequence moves, string caption = "", string longCaption = "")
-        {
-            foreach (Move move in moves.Moves)
-            {
-                AddMoveToSolution( move, caption, longCaption);
-            }
-        }
+        //private void AddMoveToSolution(MoveSequence moves, string caption = "", string longCaption = "")
+        //{
+        //    foreach (Move move in moves.Moves)
+        //    {
+        //        AddMoveToSolution( move, caption, longCaption);
+        //    }
+        //}
 
         private void AddMoveToSolution(string moveString, string caption = "", string longCaption = "")
         {
-            MoveSequence moves = new MoveSequence(moveString);
+            MoveSequence moves = new MoveSequence(moveString,caption, longCaption);
             foreach (Move move in moves.Moves)
             {
                 AddMoveToSolution(move, caption, longCaption);

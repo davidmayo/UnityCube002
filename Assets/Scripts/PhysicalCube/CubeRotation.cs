@@ -184,7 +184,7 @@ namespace PhysicalCube
 
             // If there's no apostrophe, the inverse will be the same string but WITH an apostrophe
             else
-                return new CubeRotation(MoveString + "'");
+                return new CubeRotation(MoveString + "'", CaptionHeaderText, CaptionBodyText);
         }
 
         /// <summary>

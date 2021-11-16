@@ -18,7 +18,9 @@ public class GameManager : MonoBehaviour
         FreeRotation
     }
     public GameState State { get; private set; }
+
     [Header("Cube")]
+
     public string StartingPosition = "WWWWWWWWW/GGGGGGGGG/RRRRRRRRR/BBBBBBBBB/OOOOOOOOO/YYYYYYYYY";
     public string DefaultSequence = "M'2 U M'2 U2 M'2 U M'2";
     [Header("Rotation")]
@@ -31,17 +33,21 @@ public class GameManager : MonoBehaviour
     public float ProjectionThreshold = 1.5f;
 
     [Header("References")]
+
     public GameObject ModalPrefab;
     public PhysicalCube.Cube Cube;
     public InputField MoveInputField;
     public InputField CanonicalInputField;
     public List<Button> colorButtons;
     public Image CurrentColorDisplay;
-
-
+    public Text TutorialHeader;
+    public Text TutorialContent;
+    public Button HelpButton;
+    public Slider SpeedSlider;
 
     // Rotation Sequence stuff
     [Header("Debug stuff")]
+
     public string DebugString;
     private string currentRotationStartPosition;
     //[SerializeField]
@@ -50,7 +56,8 @@ public class GameManager : MonoBehaviour
     private PhysicalCube.RotationSequence currentRotationSequence;
     [SerializeField]
     private bool isPaused;
-
+    [SerializeField]
+    private bool IsTutorial;
     [SerializeField]
     private bool rotationSequenceInProgress;
     [SerializeField]
@@ -59,6 +66,7 @@ public class GameManager : MonoBehaviour
     bool isMidRotationSequence = false;
 
     [Header("User input mode")]
+
     [SerializeField]
     private Color currentColor;
 
@@ -230,7 +238,9 @@ public class GameManager : MonoBehaviour
             if (!currentRotationSequence.IsBeginning)
             {
                 rotationSequenceInProgress = true;
-                RotateCube(currentRotationSequence.GetBackward());
+                var nextRotation = currentRotationSequence.GetBackward();
+                Debug.Log($"Starting rotation {nextRotation} HEADER: {nextRotation.CaptionHeaderText} BODY: {nextRotation.CaptionBodyText}");
+                RotateCube(nextRotation);
                 //Cube.StartRotation(currentRotationSequence.GetBackward());
             }
         }
@@ -241,7 +251,9 @@ public class GameManager : MonoBehaviour
             if (!currentRotationSequence.IsEnd)
             {
                 rotationSequenceInProgress = true;
-                RotateCube(currentRotationSequence.GetForward());
+                var nextRotation = currentRotationSequence.GetForward();
+                Debug.Log($"Starting rotation {nextRotation} HEADER: {nextRotation.CaptionHeaderText} BODY: {nextRotation.CaptionBodyText}");
+                RotateCube(nextRotation);
                 //Cube.StartRotation(currentRotationSequence.GetForward());
             }
         }
@@ -262,6 +274,32 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
+        // Ready to start the rotation
+        Debug.Log($"Starting rotation {rotation} HEADER: {rotation.CaptionHeaderText} BODY: {rotation.CaptionBodyText}");
+
+        // Update the caption, UNLESS it's in tutorial mode.
+        if (!IsTutorial)
+        {
+            if (!string.IsNullOrWhiteSpace(rotation.CaptionHeaderText))
+            {
+                TutorialHeader.text = rotation.CaptionHeaderText;
+            }
+            else
+            {
+                TutorialHeader.text = rotation.MoveString;
+            }
+
+
+            if (!string.IsNullOrWhiteSpace(rotation.CaptionBodyText))
+            {
+                TutorialContent.text = rotation.CaptionBodyText;
+            }
+            else
+            {
+                TutorialContent.text = "Do move: " + rotation.MoveString;
+            }
+
+        }
         // Do the rotation coroutine
         yield return StartCoroutine(Cube.RotateCoroutine(rotation));
 
@@ -310,20 +348,54 @@ public class GameManager : MonoBehaviour
         
     }
 
+    // Set rotation speed from 1 to 5
+    public void SetRotationSpeedFromSlider()
+    {
+        float speed = SpeedSlider.value;
+        float epsilon = .01f;
+        if( speed < 1.0 + epsilon)
+        {
+            this.RotationSpeedDegreesPerSecond = 135f;
+            this.RotationDelayMilliseconds = 250f;
+        }
+        else if( speed < 2.0 + epsilon)
+        {
+            this.RotationSpeedDegreesPerSecond = 225f;
+            this.RotationDelayMilliseconds = 100f;
+        }
+        else if( speed < 3.0 + epsilon )
+        {
+            this.RotationSpeedDegreesPerSecond = 270f;
+            this.RotationDelayMilliseconds = 50f;
+        }
+        else if ( speed < 4.0 + epsilon)
+        {
+            this.RotationSpeedDegreesPerSecond = 540f;
+            this.RotationDelayMilliseconds = 25f;
+        }
+        else
+        {
+            this.RotationSpeedDegreesPerSecond = 1080f;
+            this.RotationDelayMilliseconds = 10f;
+        }
+    }
+
     
 
     public void HelpButtonClicked()
     {
         Debug.Log($"Help Button Clicked {this}");
 
-        Cube.SetCubeFromCanonicalString("WWWWWWWWW/GGGGGGGGG/RRRRRRRRR/BBBBBBBBB/OOOOOOOOO/YYYYYYYYY");
-        
-        
-        //Instantiate(ModalPrefab);
-        //Canvas canvas = ModalPrefab.GetComponent<Canvas>();
-        //canvas.enabled = false;
-        //// Code to set the modal stuff goes here
-        //canvas.enabled = true;
+        if( IsTutorial)
+        {
+            IsTutorial = false;
+            HelpButton.GetComponentInChildren<Text>().text = "Start Tutorial";
+        }
+        else
+        {
+            HelpButton.GetComponentInChildren<Text>().text = "Stop Tutorial";
+            IsTutorial = true;
+        }
     }
 
     
@@ -431,6 +503,14 @@ public class GameManager : MonoBehaviour
         //isCurrentlyReversed = false;
     }
 
+    public void SetRotationSequence(PhysicalCube.RotationSequence solutionSequence)
+    {
+        currentRotationStartPosition = Cube.CanonicalString;
+        //unalteredRotationSequence = new RotationSequence(MoveInputField.text);
+        currentRotationSequence = solutionSequence;
+        isCurrentlyReversed = false;
+    }
+
     public void SetRotationSequence(string moveSequenceString)
     {
         currentRotationStartPosition = Cube.CanonicalString;
@@ -453,8 +533,22 @@ public class GameManager : MonoBehaviour
         LogicalCube.Cube logicalCube = new LogicalCube.Cube(Cube.CanonicalString);
         LogicalCube.Solution solution = new LogicalCube.Solution(logicalCube);
 
+
+        List<PhysicalCube.CubeRotation> solutionSteps = new List<PhysicalCube.CubeRotation>();
+
+        // Create new CubeRotation for each move, preserving the captions
+        foreach( var move in solution.moveList )
+        {
+            solutionSteps.Add(new PhysicalCube.CubeRotation(move.MoveString, move.CaptionHeader, move.CaptionText));
+        }
+
+        PhysicalCube.RotationSequence solutionSequence = new PhysicalCube.RotationSequence(solutionSteps);
+
         MoveInputField.text = solution.ToString();
-        SetRotationSequence();
+
+        Debug.Log($"Solution sequence: {solutionSequence}");
+
+        SetRotationSequence(solutionSequence);
         
 
         Debug.Log($"SOLUTION length: {solution.moveList.Count}    ToString: {solution}");

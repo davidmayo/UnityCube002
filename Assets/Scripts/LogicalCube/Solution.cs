@@ -11,6 +11,7 @@ namespace LogicalCube
     /// </summary>
     class Solution
     {
+        string currentStep;
         public List<Move> moveList;
         public Cube _cube;
         //public Cube initialCube;
@@ -490,8 +491,10 @@ namespace LogicalCube
 
         private void SolveWhiteCorners()
         {
+            currentStep = "2: Solve the White Corners";
+
             // Flip the cube over
-            AddMoveToSolution(new Move("x2"), "Flip the cube over.");
+            AddMoveToSolution("x2", currentStep, "Flip the cube over so that YELLOW faces UP.");
 
             //MoveCubeToStandardOrientation();
             ;
@@ -519,7 +522,7 @@ namespace LogicalCube
             string frontColor = cornerPiece.Substring(1, 1);
             while( _cube.FindPiece(frontColor) != Square.F )
             {
-                AddMoveToSolution("y", "Rotate cube until the " + frontColor + " side is in front.");
+                AddMoveToSolution("y", currentStep, "Rotate cube until the " + GetPieceString( frontColor )+ " side is in front.");
             }
 
             Square location = _cube.FindPiece(cornerPiece);
@@ -544,11 +547,11 @@ namespace LogicalCube
                     // Rotate cube until PIECE is in DFR
                     while (!_cube.FindPiece(cornerPiece).IsSamePiece(Square.DFR))
                     {
-                        AddMoveToSolution("y", "Rotate cube until " + cornerPiece + " corner is in DFR position.");
+                        AddMoveToSolution("y", currentStep, "Rotate cube until " + GetPieceString(cornerPiece) + " corner is in DFR position.");
                     }
 
                     // Do R U R' U' to place in top layer
-                    AddMoveToSolution("R U R' U'", "Bring " + cornerPiece + " corner into top layer.");
+                    AddMoveToSolution("R U R' U'", currentStep, "Do the four move sequence until " + GetPieceString(cornerPiece) + " corner is solved.");
 
                     //Console.WriteLine("At recursive call, cornerPiece is in " + cube.FindPiece(cornerPiece));
 
@@ -561,11 +564,11 @@ namespace LogicalCube
                 // Do U until piece is in UFR position
                 while (!_cube.FindPiece(cornerPiece).IsSamePiece(Square.UFR))
                 {
-                    AddMoveToSolution("U", "Rotate upper face until " + cornerPiece + " corner is in UFR position.");
+                    AddMoveToSolution("U", currentStep, "Do the four move sequence until " + GetPieceString(cornerPiece) + " corner is solved.");
 
                 }
 
-                AddMoveToSolution("R U R' U'", "Bring " + cornerPiece + " corner into bottom layer.");
+                AddMoveToSolution("R U R' U'", currentStep, "Do the four move sequence until " + GetPieceString(cornerPiece) + " corner is solved.");
                 // Do R U R' U' to place in bottom layer
 
                 //Console.WriteLine("At recursive call, cornerPiece is in " + cube.FindPiece(cornerPiece));
@@ -698,17 +701,17 @@ namespace LogicalCube
             _cube.MakeMove(move);
         }
 
-        private void AddMoveToSolution(MoveSequence moves, string caption = "", string longCaption = "")
-        {
-            foreach (Move move in moves.Moves)
-            {
-                AddMoveToSolution( move, caption, longCaption);
-            }
-        }
+        //private void AddMoveToSolution(MoveSequence moves, string caption = "", string longCaption = "")
+        //{
+        //    foreach (Move move in moves.Moves)
+        //    {
+        //        AddMoveToSolution( move, caption, longCaption);
+        //    }
+        //}
 
         private void AddMoveToSolution(string moveString, string caption = "", string longCaption = "")
         {
-            MoveSequence moves = new MoveSequence(moveString);
+            MoveSequence moves = new MoveSequence(moveString,caption, longCaption);
             foreach (Move move in moves.Moves)
             {
                 AddMoveToSolution(move, caption, longCaption);
@@ -718,7 +721,7 @@ namespace LogicalCube
 
         private void SolveWhiteCross()
         {
-            
+            currentStep = "1: Solve the White Cross";
 
             Dictionary<string, int> pieceDestinations = new Dictionary<string, int>();
             pieceDestinations.Add("WG", Square.UF.Index);
@@ -751,7 +754,7 @@ namespace LogicalCube
             // Prep: Rotate cube so white is U and the side being solved is F
             while (!Square.IsSamePiece(Square.F, _cube.FindPiece(destinationSide)))
             {
-                AddMoveToSolution("y", "Rotating so green side is in front");
+                AddMoveToSolution("y", currentStep, $"Rotate the cube until the {GetPieceString(destinationSide)} side faces FRONT.");
             }
 
             pieceSquare_ = _cube.FindPiece(pieceString);
@@ -770,17 +773,17 @@ namespace LogicalCube
                 // Rotate D to put target below destination center square
                 while( !Square.IsSamePiece(Square.FD, _cube.FindPiece(pieceString)))
                 {
-                    AddMoveToSolution("D", $"Rotating D until {pieceString} edge piece is in FRONT-DOWN position");
+                    AddMoveToSolution("D", currentStep, $"Rotating D until {GetPieceString(pieceString)} edge piece is in FRONT / DOWN slot.");
                 }
 
                 if ( !isOriented )
                 {
-                    AddMoveToSolution("D R F' R'", $"Flip {pieceString} piece and put it into FRONT-UP position.");
+                    AddMoveToSolution("D R F' R'", currentStep, $"Flip {GetPieceString(pieceString)} piece and put it into FRONT / DOWN slot.");
                 }
                 else
                 {
                     // Do an F2 to place edge
-                    AddMoveToSolution("F2", $"Put {pieceString} piece into FRONT-UP position.");
+                    AddMoveToSolution("F2", currentStep, $"Solve {GetPieceString(pieceString)} piece by putting it into the FRONT / UP slot.");
                 }
             }
 
@@ -789,7 +792,7 @@ namespace LogicalCube
                 // Rotate cube so white is U and piece is in FR slot
                 while( !Square.IsSamePiece(Square.FR,_cube.FindPiece(pieceString)))
                 {
-                    AddMoveToSolution("y", $"Rotate until {pieceString} edge is in FRONT-RIGHT location.");
+                    AddMoveToSolution("y", currentStep, $"Rotate until {GetPieceString(pieceString)} edge is in FRONT/RIGHT slot.");
                 }
 
                 pieceSquare_ = _cube.FindPiece(pieceString);
@@ -797,7 +800,7 @@ namespace LogicalCube
 
                 if(whiteSideFront)
                 {
-                    AddMoveToSolution("R' D' R", $"I THINK THIS IS WRONG");
+                    AddMoveToSolution("R' D' R", currentStep, $"Place {GetPieceString(pieceString)} edge into BOTTOM layer, properly oriented.");
 
                     // Call this function recursively
                     SolveWhiteCrossPiece(pieceString, destinationSquareIndex, algorithmMoves);
@@ -806,7 +809,7 @@ namespace LogicalCube
                 else
                 {
                     // Do F D F' to place piece in bottom layer, properly oriented
-                    AddMoveToSolution("F D F'", $"Place {pieceString} edge into BOTTOM layer, properly oriented.");
+                    AddMoveToSolution("F D F'", currentStep, $"Place {GetPieceString(pieceString)} edge into BOTTOM layer, properly oriented.");
 
                     // Call this function recursively
                     SolveWhiteCrossPiece(pieceString, destinationSquareIndex, algorithmMoves);
@@ -819,7 +822,7 @@ namespace LogicalCube
                 // Rotate cube so piece is in UF position
                 while (!Square.IsSamePiece(Square.UF, _cube.FindPiece(pieceString)))
                 {
-                    AddMoveToSolution("y", $"Rotate cube until {pieceString} edge is in UPPER-FRONT position.");
+                    AddMoveToSolution("y", currentStep, $"Rotate cube until {GetPieceString(pieceString)} edge is in UPPER / FRONT slot.");
                 }
 
                 pieceSquare_ = _cube.FindPiece(pieceString);
@@ -837,7 +840,7 @@ namespace LogicalCube
                     else
                     {
                         // Solve the edge with F2
-                        AddMoveToSolution("F2", $"Solve {pieceString} edge in UPPER-FRONT position.");
+                        AddMoveToSolution("F2", currentStep, $"Solve {GetPieceString(pieceString)} edge in UPPER / FRONT slot.");
 
                         // Call this function recursively
                         SolveWhiteCrossPiece(pieceString, destinationSquareIndex, algorithmMoves);
@@ -901,6 +904,54 @@ namespace LogicalCube
                 throw new Exception("Green center can't be up if white is up.");
             else
                 throw new Exception("Unable to find green center.");    // Should never happen - FindPiece() would have thrown.
+        }
+
+        private static string GetPieceString(string piece)
+        {
+            string returnValue = "";
+
+            for (int index = 0; index < piece.Length; index++)
+            {
+                returnValue += piece[index] switch
+                {
+                    'W' => "WHITE",
+                    'Y' => "YELLOW",
+                    'G' => "GREEN",
+                    'B' => "BLUE",
+                    'R' => "RED",
+                    'O' => "ORANGE",
+                    _ => piece[index],
+                };
+
+                // Add a / unless this is the last entry
+                if ( index < piece.Length - 1)
+                    returnValue += " / ";
+            }
+            return returnValue;
+        }
+
+        private static string GetLocationString(string location)
+        {
+            string returnValue = "";
+
+            for (int index = 0; index < location.Length; index++)
+            {
+                returnValue += location[index] switch
+                {
+                    'U' => "UPPER",
+                    'D' => "DOWN",
+                    'F' => "FRONT",
+                    'B' => "BACK",
+                    'R' => "RIGHT",
+                    'L' => "LEFT",
+                    _ => location[index],
+                };
+
+                // Add a / unless this is the last entry
+                if (index < location.Length - 1)
+                    returnValue += " / ";
+            }
+            return returnValue;
         }
     }
 }

@@ -360,7 +360,7 @@ public class GameManager : MonoBehaviour
         }
         else if( speed < 2.0 + epsilon)
         {
-            this.RotationSpeedDegreesPerSecond = 225f;
+            this.RotationSpeedDegreesPerSecond = 180f;
             this.RotationDelayMilliseconds = 100f;
         }
         else if( speed < 3.0 + epsilon )
@@ -370,17 +370,61 @@ public class GameManager : MonoBehaviour
         }
         else if ( speed < 4.0 + epsilon)
         {
-            this.RotationSpeedDegreesPerSecond = 540f;
+            this.RotationSpeedDegreesPerSecond = 360;
             this.RotationDelayMilliseconds = 25f;
         }
         else
         {
-            this.RotationSpeedDegreesPerSecond = 1080f;
+            this.RotationSpeedDegreesPerSecond = 720f;
             this.RotationDelayMilliseconds = 10f;
         }
     }
 
-    
+    PhysicalCube.RotationSequence GenerateScramble(int scrambleLength = 15, System.Random random = null )
+    {
+        System.Random rand = random;
+
+        if (rand is null)
+            rand = new System.Random();
+
+        string scrambleString = "";
+
+        string[] axisSource = { "UD", "LR", "FB"};
+        string[] modifierSource = { "", "'" };
+
+        int previousAxis = -1;
+        int axis;
+        for ( int i = 0; i < scrambleLength; i++)
+        {
+            // Make sure this axis is different from previous axis.
+            do
+            {
+                axis = rand.Next(3);
+            } while (axis == previousAxis);
+            previousAxis = axis;
+
+            // Get one character from the axis
+            scrambleString += axisSource[axis][rand.Next(0, 2)];
+
+            // Add ' half the time
+            if (rand.NextDouble() > 0.5)
+                scrambleString += "'";
+
+            scrambleString += " ";
+        }
+
+        scrambleString = scrambleString.Trim();
+
+        return new PhysicalCube.RotationSequence(scrambleString);
+    }
+
+    public void ScrambleCube()
+    {
+        SetCube(StartingPosition);
+        SetRotationSequence(GenerateScramble());
+        PlaySequenceFromHere();
+    }
+
 
     public void HelpButtonClicked()
     {

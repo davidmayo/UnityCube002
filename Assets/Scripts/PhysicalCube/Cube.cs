@@ -389,6 +389,9 @@ namespace PhysicalCube
         {
             foreach (var projection in loc.GetProjections())
             {
+                if (projection is null)
+                    break;
+
                 MeshRenderer meshRenderer = projection.GetComponent<MeshRenderer>();
 
                 // Get the current color of the Projection

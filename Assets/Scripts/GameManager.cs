@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
     [Header("References")]
 
     public GameObject ModalPrefab;
+    public GameObject CubePrefab;
     public PhysicalCube.Cube Cube;
     public InputField MoveInputField;
     public InputField CanonicalInputField;
@@ -46,6 +47,7 @@ public class GameManager : MonoBehaviour
     public Slider SpeedSlider;
     public GameObject CaptionControls;
     public GameObject EditCubeControls;
+    public GameObject BaseUI;
 
 
     // Rotation Sequence stuff
@@ -124,6 +126,140 @@ public class GameManager : MonoBehaviour
         }
 
         SetColor("unknown");
+    }
+
+    // Kaaaa-BOOOOOOM!!
+    public void ExplodeCube()
+    {
+        PauseRotationSequence();
+
+        this.StopAllCoroutines();
+        //Cube.StopAllCoroutines();
+        StartCoroutine(ExplodeCubeCoroutine());
+    }
+    public IEnumerator ExplodeCubeCoroutine()
+    {
+        BaseUI.SetActive(false);
+        this.ShowProjections = false;
+
+        PhysicalCube.CubeLocator loc = new PhysicalCube.CubeLocator();
+
+        foreach( var projection in loc.GetProjections() )
+        {
+            //Destroy(projection.gameObject);
+
+            foreach( BoxCollider boxCollider in projection.GetComponentsInChildren<BoxCollider>())
+            {
+                boxCollider.enabled = false;
+            }
+
+        }
+
+        foreach( var piece in loc.GetPieces())
+        {
+            //piece.SetActive(false);
+            foreach( Rigidbody rigidbody in piece.GetComponentsInChildren<Rigidbody>())
+            {
+                rigidbody.isKinematic = false;
+
+                //rigidbody.AddExplosionForce(1, Vector3.zero, 3);
+                rigidbody.velocity = (piece.transform.position + Vector3.up * 5) + 5*UnityEngine.Random.insideUnitSphere;
+                rigidbody.angularVelocity = piece.transform.position + 5*UnityEngine.Random.insideUnitSphere;
+
+
+            }
+        }
+
+        //var newCube = Instantiate(Cube);
+
+        int maxCubes = 10;
+
+        Color[] possibleCubeColors = {
+            PhysicalCube.StickerColors.WhiteSticker,
+            PhysicalCube.StickerColors.YellowSticker,
+            PhysicalCube.StickerColors.GreenSticker,
+            PhysicalCube.StickerColors.BlueSticker,
+            PhysicalCube.StickerColors.RedSticker,
+            PhysicalCube.StickerColors.OrangeSticker,
+
+        };
+        System.Random rand = new System.Random();
+
+        Queue<GameObject> cubeClones = new Queue<GameObject>();
+
+        do
+        {
+            yield return new WaitForSeconds(.7f);
+
+            // Make a new cube
+
+            Vector3 position = UnityEngine.Random.insideUnitSphere * 1.5f;
+            position.y = position.y * 3 + 1;
+            position.x += -1f;
+            position.z += 1f;
+
+            Quaternion rotation = UnityEngine.Random.rotationUniform;
+
+            var newCube = Instantiate(CubePrefab, position, rotation);
+            cubeClones.Enqueue(newCube);
+
+            // If too many cubes, destroy the oldest one.
+            if( cubeClones.Count > maxCubes)
+            {
+                var toDestroy = cubeClones.Dequeue();
+
+                Destroy(toDestroy);
+            }
+
+
+            // Set all the stickers on the new cube
+            Color newStickerColor = possibleCubeColors[rand.Next(possibleCubeColors.Length)];
+
+            foreach( GameObject gameObject in GameObject.FindGameObjectsWithTag("Sticker"))
+            {
+                float threshold = 2.07f; // Distance from origin to <1, 1, 1.5> = sqrt(4.25) = 2.06155
+                if( Vector3.Distance(gameObject.transform.position, position) > threshold)
+                {
+                    continue;
+                }
+
+                //if (gameObject.transform.position.x < positionOffset.x - threshold || gameObject.transform.position.x > positionOffset.x + threshold ||
+                //    gameObject.transform.position.y < positionOffset.y - threshold || gameObject.transform.position.y > positionOffset.y + threshold ||
+                //    gameObject.transform.position.z < positionOffset.z - threshold || gameObject.transform.position.z > positionOffset.z + threshold)
+                //    continue;
+
+                gameObject.GetComponent<MeshRenderer>().material.color = newStickerColor;
+            }
+
+            // Turn off the new projections
+            foreach (var projection in GameObject.FindGameObjectsWithTag("Projection"))
+            {
+                MeshRenderer mr = projection.GetComponent<MeshRenderer>();
+                Color newColor = mr.material.color;
+                newColor.a = 0;
+                mr.material.color = newColor;
+
+                BoxCollider bc = projection.GetComponent<BoxCollider>();
+                bc.enabled = false;
+            }
+
+            foreach (var rigidbody in newCube.GetComponentsInChildren<Rigidbody>())
+            {
+                //piece.SetActive(false);
+
+
+                //foreach (Rigidbody rigidbody in piece.GetComponentsInChildren<Rigidbody>())
+                {
+                    rigidbody.isKinematic = false;
+
+                    //rigidbody.AddExplosionForce(500f, position, 3f);
+                    //rigidbody.velocity = (rigidbody.transform.position + Vector3.up * 5) + 5 * UnityEngine.Random.insideUnitSphere;
+                    rigidbody.angularVelocity = rigidbody.transform.position + 5 * UnityEngine.Random.insideUnitSphere;
+                    rigidbody.AddExplosionForce(rand.Next(1000), (position + new Vector3(0, -.75f + (float)rand.NextDouble(), 0)), 5f);
+
+                }
+            }
+        } while (true);
     }
 
     public void SetCube(string newString )

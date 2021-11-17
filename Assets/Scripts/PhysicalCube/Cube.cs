@@ -114,24 +114,6 @@ namespace PhysicalCube
         /// </summary>
         void Update()
         {
-            // TODO: Move the color selection stuff to GameManager class
-            // (Don't delete the commented out code yet though) - Mayo 11/4/21
-            //if (Input.GetMouseButtonDown(0))
-            //{
-            //    RaycastHit hit;
-            //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            //
-            //    if (Physics.Raycast(ray, out hit))
-            //    {
-            //        GameObject hitObject = hit.transform.gameObject;
-            //
-            //        if (hitObject.CompareTag("Sticker") || hitObject.CompareTag("Projection"))
-            //        {
-            //            SetStickerColor(hitObject);
-            //        }
-            //    }
-            //}
-
             // Update projection visibility every frame, because the user could change the
             // setting at any point
             UpdateProjectionOpacity();
@@ -145,7 +127,7 @@ namespace PhysicalCube
             while( !IsReadyToRotate )
             {
                 //Debug.Log($"{DateTime.Now:HH:mm:ss.FFFF} Not ready to rotate. Waiting. ");
-                yield return null;
+                yield return new WaitForFixedUpdate();
             }
 
             // Re-establish the lockout
@@ -163,7 +145,7 @@ namespace PhysicalCube
             {
                 // Angle to move per frame (in degrees) is
                 // (desired speed in degrees/second) * (length of frame in seconds) * (direction of rotation [-1 or 1])
-                float frameAngleToRotate = Time.deltaTime * DegreesPerSecond * currentRotation.Direction;
+                float frameAngleToRotate = Time.fixedDeltaTime * DegreesPerSecond * currentRotation.Direction;
 
                 // Iterate over the moving pieces and rotate them
                 // Stickers and Projections are children of pieces, so only the pieces need to be moved
@@ -180,7 +162,7 @@ namespace PhysicalCube
                 currentRotationAngle += Mathf.Abs(frameAngleToRotate);
 
                 //Debug.Log($"{DateTime.Now:HH:mm:ss.FFFF} Rotated by {frameAngleToRotate} deg.   Current={currentRotationAngle} deg    Target={currentRotation.Angle} deg. Deferring to next frame");
-                yield return null;
+                yield return new WaitForFixedUpdate();
             }
 
             // Rotation is now done.

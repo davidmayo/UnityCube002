@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
     public string StartingPosition = "WWWWWWWWW/GGGGGGGGG/RRRRRRRRR/BBBBBBBBB/OOOOOOOOO/YYYYYYYYY";
     public string DefaultSequence = "M'2 U M'2 U2 M'2 U M'2";
     [Header("Rotation")]
-    [Range(0f,1080f)]
+    [Range(0f,10800f)]
     public float RotationSpeedDegreesPerSecond = 135f;
     [Range(0f, 1000f)]
     public float RotationDelayMilliseconds = 100f;

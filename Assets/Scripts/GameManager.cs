@@ -44,6 +44,9 @@ public class GameManager : MonoBehaviour
     public Text TutorialContent;
     public Button HelpButton;
     public Slider SpeedSlider;
+    public GameObject CaptionControls;
+    public GameObject EditCubeControls;
+
 
     // Rotation Sequence stuff
     [Header("Debug stuff")]
@@ -147,6 +150,10 @@ public class GameManager : MonoBehaviour
         UpdateCanonicalString();
     }
 
+    public void ToggleCubeInputVisibility()
+    {
+        EditCubeControls.SetActive(!EditCubeControls.activeSelf);
+    }
     public void SetColor(string color = "")
     {
         switch( color )
@@ -434,11 +441,13 @@ public class GameManager : MonoBehaviour
         {
             IsTutorial = false;
             HelpButton.GetComponentInChildren<Text>().text = "Start Tutorial";
+            CaptionControls.SetActive(false);
         }
         else
         {
             HelpButton.GetComponentInChildren<Text>().text = "Stop Tutorial";
             IsTutorial = true;
+            CaptionControls.SetActive(true);
         }
     }
 

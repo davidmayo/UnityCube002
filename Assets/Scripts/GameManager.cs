@@ -135,6 +135,15 @@ public class GameManager : MonoBehaviour
         SetColor("unknown");
     }
 
+    public void ExplodeAndExit()
+    {
+        PauseRotationSequence();
+
+        this.StopAllCoroutines();
+        //Cube.StopAllCoroutines();
+        StartCoroutine(ExplodeCubeCoroutine(false));
+    }
+
     // Kaaaa-BOOOOOOM!!
     public void ExplodeCube()
     {
@@ -144,7 +153,7 @@ public class GameManager : MonoBehaviour
         //Cube.StopAllCoroutines();
         StartCoroutine(ExplodeCubeCoroutine());
     }
-    public IEnumerator ExplodeCubeCoroutine()
+    public IEnumerator ExplodeCubeCoroutine(bool exitAfterExploding = true)
     {
         UIBase.SetActive(false);
         this.ShowProjections = false;
@@ -176,6 +185,15 @@ public class GameManager : MonoBehaviour
 
             }
         }
+
+        if (!exitAfterExploding)
+        {
+            yield return new WaitForSecondsRealtime(2.5f);
+            Application.Quit();
+        }
+        
+
+        yield break;
 
         //var newCube = Instantiate(Cube);
 
@@ -602,23 +620,17 @@ public class GameManager : MonoBehaviour
         //}
     }
 
-    
-
-    // Update is called once per frame
-    void Update()
+    void UpdateStickerColor()
     {
         if (Input.GetMouseButtonDown(0) && State == GameState.StickerInput)
         {
-            Debug.Log("Mouse button down and StickerInput state");
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        
+
             if (Physics.Raycast(ray, out hit))
             {
-                Debug.Log($"collider {hit.collider}");
                 //hit.collider.gameObject;
                 GameObject hitObject = hit.collider.gameObject;// hit.transform.gameObject;
-                Debug.Log($"Raycast hit {hitObject}");
 
 
 
@@ -627,8 +639,8 @@ public class GameManager : MonoBehaviour
                 MeshRenderer meshRenderer = hitObject.GetComponent<MeshRenderer>();
 
                 float alphaValue = meshRenderer.material.color.a;
-        
-                if ( (alphaValue > .99f) &&
+
+                if ((alphaValue > .99f) &&
                      (hitObject.CompareTag("Sticker") || hitObject.CompareTag("Projection")))
                 {
                     Cube.SetStickerColor(hitObject, currentColor);
@@ -650,10 +662,16 @@ public class GameManager : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        UpdateStickerColor();
             
 
             
-        }
         //UpdateCanonicalString();
         //switch (this.State)
         //{

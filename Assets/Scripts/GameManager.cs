@@ -15,9 +15,12 @@ public class GameManager : MonoBehaviour
     {
         StickerInput,
         SolutionView,
-        FreeRotation
+        FreeRotation,
+        Tutorial
     }
     public GameState State { get; private set; }
+    public GameState PreviousState { get; private set; }
+
 
     [Header("Cube")]
 
@@ -35,6 +38,7 @@ public class GameManager : MonoBehaviour
     [Header("References")]
 
     public GameObject ModalPrefab;
+    public GameObject CubePrefab;
     public PhysicalCube.Cube Cube;
     public InputField MoveInputField;
     public InputField CanonicalInputField;
@@ -44,8 +48,13 @@ public class GameManager : MonoBehaviour
     public Text TutorialContent;
     public Button HelpButton;
     public Slider SpeedSlider;
-    public GameObject CaptionControls;
-    public GameObject EditCubeControls;
+
+
+    public GameObject UIBase;
+    public GameObject UICubeControls;
+    public GameObject UICaptionArea;
+    public GameObject UICaptionControls;
+    public GameObject UIInputControls;
 
 
     // Rotation Sequence stuff
@@ -126,6 +135,158 @@ public class GameManager : MonoBehaviour
         SetColor("unknown");
     }
 
+    public void ExplodeAndExit()
+    {
+        PauseRotationSequence();
+
+        this.StopAllCoroutines();
+        //Cube.StopAllCoroutines();
+        StartCoroutine(ExplodeCubeCoroutine(false));
+    }
+
+    // Kaaaa-BOOOOOOM!!
+    public void ExplodeCube()
+    {
+        PauseRotationSequence();
+
+        this.StopAllCoroutines();
+        //Cube.StopAllCoroutines();
+        StartCoroutine(ExplodeCubeCoroutine());
+    }
+    public IEnumerator ExplodeCubeCoroutine(bool exitAfterExploding = true)
+    {
+        UIBase.SetActive(false);
+        this.ShowProjections = false;
+
+        PhysicalCube.CubeLocator loc = new PhysicalCube.CubeLocator();
+
+        foreach( var projection in loc.GetProjections() )
+        {
+            //Destroy(projection.gameObject);
+
+            foreach( BoxCollider boxCollider in projection.GetComponentsInChildren<BoxCollider>())
+            {
+                boxCollider.enabled = false;
+            }
+
+        }
+
+        foreach( var piece in loc.GetPieces())
+        {
+            //piece.SetActive(false);
+            foreach( Rigidbody rigidbody in piece.GetComponentsInChildren<Rigidbody>())
+            {
+                rigidbody.isKinematic = false;
+
+                //rigidbody.AddExplosionForce(1, Vector3.zero, 3);
+                rigidbody.velocity = (piece.transform.position + Vector3.up * 5) + 5*UnityEngine.Random.insideUnitSphere;
+                rigidbody.angularVelocity = piece.transform.position + 5*UnityEngine.Random.insideUnitSphere;
+
+
+            }
+        }
+
+        if (!exitAfterExploding)
+        {
+            yield return new WaitForSecondsRealtime(2.5f);
+            Application.Quit();
+        }
+        
+
+        yield break;
+
+        //var newCube = Instantiate(Cube);
+
+        int maxCubes = 10;
+
+        Color[] possibleCubeColors = {
+            PhysicalCube.StickerColors.WhiteSticker,
+            PhysicalCube.StickerColors.YellowSticker,
+            PhysicalCube.StickerColors.GreenSticker,
+            PhysicalCube.StickerColors.BlueSticker,
+            PhysicalCube.StickerColors.RedSticker,
+            PhysicalCube.StickerColors.OrangeSticker,
+
+        };
+        System.Random rand = new System.Random();
+
+        Queue<GameObject> cubeClones = new Queue<GameObject>();
+
+        do
+        {
+            yield return new WaitForSeconds(.7f);
+
+            // Make a new cube
+
+            Vector3 position = UnityEngine.Random.insideUnitSphere * 1.5f;
+            position.y = position.y * 3 + 1;
+            position.x += -1f;
+            position.z += 1f;
+
+            Quaternion rotation = UnityEngine.Random.rotationUniform;
+
+            var newCube = Instantiate(CubePrefab, position, rotation);
+            cubeClones.Enqueue(newCube);
+
+            // If too many cubes, destroy the oldest one.
+            if( cubeClones.Count > maxCubes)
+            {
+                var toDestroy = cubeClones.Dequeue();
+
+                Destroy(toDestroy);
+            }
+
+
+            // Set all the stickers on the new cube
+            Color newStickerColor = possibleCubeColors[rand.Next(possibleCubeColors.Length)];
+
+            foreach( GameObject gameObject in GameObject.FindGameObjectsWithTag("Sticker"))
+            {
+                float threshold = 2.07f; // Distance from origin to <1, 1, 1.5> = sqrt(4.25) = 2.06155
+                if( Vector3.Distance(gameObject.transform.position, position) > threshold)
+                {
+                    continue;
+                }
+
+                //if (gameObject.transform.position.x < positionOffset.x - threshold || gameObject.transform.position.x > positionOffset.x + threshold ||
+                //    gameObject.transform.position.y < positionOffset.y - threshold || gameObject.transform.position.y > positionOffset.y + threshold ||
+                //    gameObject.transform.position.z < positionOffset.z - threshold || gameObject.transform.position.z > positionOffset.z + threshold)
+                //    continue;
+
+                gameObject.GetComponent<MeshRenderer>().material.color = newStickerColor;
+            }
+
+            // Turn off the new projections
+            foreach (var projection in GameObject.FindGameObjectsWithTag("Projection"))
+            {
+                MeshRenderer mr = projection.GetComponent<MeshRenderer>();
+                Color newColor = mr.material.color;
+                newColor.a = 0;
+                mr.material.color = newColor;
+
+                BoxCollider bc = projection.GetComponent<BoxCollider>();
+                bc.enabled = false;
+            }
+
+            foreach (var rigidbody in newCube.GetComponentsInChildren<Rigidbody>())
+            {
+                //piece.SetActive(false);
+
+
+                //foreach (Rigidbody rigidbody in piece.GetComponentsInChildren<Rigidbody>())
+                {
+                    rigidbody.isKinematic = false;
+
+                    //rigidbody.AddExplosionForce(500f, position, 3f);
+                    //rigidbody.velocity = (rigidbody.transform.position + Vector3.up * 5) + 5 * UnityEngine.Random.insideUnitSphere;
+                    rigidbody.angularVelocity = rigidbody.transform.position + 5 * UnityEngine.Random.insideUnitSphere;
+                    rigidbody.AddExplosionForce(rand.Next(1000), (position + new Vector3(0, -.75f + (float)rand.NextDouble(), 0)), 5f);
+
+                }
+            }
+        } while (true);
+    }
+
     public void SetCube(string newString )
     {
         if (newString.Trim().ToUpper() == "SOLVED")
@@ -150,9 +311,13 @@ public class GameManager : MonoBehaviour
         UpdateCanonicalString();
     }
 
-    public void ToggleCubeInputVisibility()
+    public void StartStickerInput()
     {
-        EditCubeControls.SetActive(!EditCubeControls.activeSelf);
+        SetGameState(GameState.StickerInput);
+    }
+    public void FinishStickerInput()
+    {
+        SetGameState(this.PreviousState);
     }
     public void SetColor(string color = "")
     {
@@ -435,43 +600,47 @@ public class GameManager : MonoBehaviour
 
     public void HelpButtonClicked()
     {
-        Debug.Log($"Help Button Clicked {this}");
-
-        if( IsTutorial)
-        {
-            IsTutorial = false;
-            HelpButton.GetComponentInChildren<Text>().text = "Start Tutorial";
-            CaptionControls.SetActive(false);
-        }
+        if (State == GameState.Tutorial)
+            SetGameState(this.PreviousState);
         else
-        {
-            HelpButton.GetComponentInChildren<Text>().text = "Stop Tutorial";
-            IsTutorial = true;
-            CaptionControls.SetActive(true);
-        }
+            SetGameState(GameState.Tutorial);
+        //Debug.Log($"Help Button Clicked {this}");
+        //
+        //if( IsTutorial)
+        //{
+        //    IsTutorial = false;
+        //    HelpButton.GetComponentInChildren<Text>().text = "Start Tutorial";
+        //    UICaptionControls.SetActive(false);
+        //}
+        //else
+        //{
+        //    HelpButton.GetComponentInChildren<Text>().text = "Stop Tutorial";
+        //    IsTutorial = true;
+        //    UICaptionControls.SetActive(true);
+        //}
     }
 
-    
-
-    // Update is called once per frame
-    void Update()
+    void UpdateStickerColor()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && State == GameState.StickerInput)
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        
+
             if (Physics.Raycast(ray, out hit))
             {
-                GameObject hitObject = hit.transform.gameObject;
+                //hit.collider.gameObject;
+                GameObject hitObject = hit.collider.gameObject;// hit.transform.gameObject;
+
+
 
                 // Only want to take any action if the thing is visible
                 // This will prevent clicking on invisible projections:
                 MeshRenderer meshRenderer = hitObject.GetComponent<MeshRenderer>();
 
                 float alphaValue = meshRenderer.material.color.a;
-        
-                if ( (alphaValue > .99f) &&
+
+                if ((alphaValue > .99f) &&
                      (hitObject.CompareTag("Sticker") || hitObject.CompareTag("Projection")))
                 {
                     Cube.SetStickerColor(hitObject, currentColor);
@@ -493,10 +662,16 @@ public class GameManager : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        UpdateStickerColor();
             
 
             
-        }
         //UpdateCanonicalString();
         //switch (this.State)
         //{
@@ -525,18 +700,37 @@ public class GameManager : MonoBehaviour
 
     void SetGameState( GameState newState )
     {
+        if (newState == this.State)
+            return;
+        
+        PreviousState = State;
+        State = newState;
+
         switch (newState)
         {
             case GameState.StickerInput:
+                UICubeControls.SetActive(false);
+                UICaptionArea.SetActive(false);
+                UIInputControls.SetActive(true);
                 break;
             case GameState.SolutionView:
+                UICubeControls.SetActive(true);
+                UICaptionArea.SetActive(true);
+                UIInputControls.SetActive(false);
                 break;
             case GameState.FreeRotation:
+                UICubeControls.SetActive(true);
+                UICaptionArea.SetActive(false);
+                UIInputControls.SetActive(false);
+                break;
+            case GameState.Tutorial:
+                UICubeControls.SetActive(false);
+                UICaptionArea.SetActive(true);
+                UIInputControls.SetActive(false);
                 break;
             default:
                 break;
         }
-        State = newState;
     }
 
     public void PauseRotationSequence()

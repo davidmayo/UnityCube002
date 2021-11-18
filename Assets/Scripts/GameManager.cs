@@ -15,9 +15,12 @@ public class GameManager : MonoBehaviour
     {
         StickerInput,
         SolutionView,
-        FreeRotation
+        FreeRotation,
+        Tutorial
     }
     public GameState State { get; private set; }
+    public GameState PreviousState { get; private set; }
+
 
     [Header("Cube")]
 
@@ -45,9 +48,13 @@ public class GameManager : MonoBehaviour
     public Text TutorialContent;
     public Button HelpButton;
     public Slider SpeedSlider;
-    public GameObject CaptionControls;
-    public GameObject EditCubeControls;
-    public GameObject BaseUI;
+
+
+    public GameObject UIBase;
+    public GameObject UICubeControls;
+    public GameObject UICaptionArea;
+    public GameObject UICaptionControls;
+    public GameObject UIInputControls;
 
 
     // Rotation Sequence stuff
@@ -139,7 +146,7 @@ public class GameManager : MonoBehaviour
     }
     public IEnumerator ExplodeCubeCoroutine()
     {
-        BaseUI.SetActive(false);
+        UIBase.SetActive(false);
         this.ShowProjections = false;
 
         PhysicalCube.CubeLocator loc = new PhysicalCube.CubeLocator();
@@ -286,9 +293,13 @@ public class GameManager : MonoBehaviour
         UpdateCanonicalString();
     }
 
-    public void ToggleCubeInputVisibility()
+    public void StartStickerInput()
     {
-        EditCubeControls.SetActive(!EditCubeControls.activeSelf);
+        SetGameState(GameState.StickerInput);
+    }
+    public void FinishStickerInput()
+    {
+        SetGameState(this.PreviousState);
     }
     public void SetColor(string color = "")
     {
@@ -571,20 +582,24 @@ public class GameManager : MonoBehaviour
 
     public void HelpButtonClicked()
     {
-        Debug.Log($"Help Button Clicked {this}");
-
-        if( IsTutorial)
-        {
-            IsTutorial = false;
-            HelpButton.GetComponentInChildren<Text>().text = "Start Tutorial";
-            CaptionControls.SetActive(false);
-        }
+        if (State == GameState.Tutorial)
+            SetGameState(this.PreviousState);
         else
-        {
-            HelpButton.GetComponentInChildren<Text>().text = "Stop Tutorial";
-            IsTutorial = true;
-            CaptionControls.SetActive(true);
-        }
+            SetGameState(GameState.Tutorial);
+        //Debug.Log($"Help Button Clicked {this}");
+        //
+        //if( IsTutorial)
+        //{
+        //    IsTutorial = false;
+        //    HelpButton.GetComponentInChildren<Text>().text = "Start Tutorial";
+        //    UICaptionControls.SetActive(false);
+        //}
+        //else
+        //{
+        //    HelpButton.GetComponentInChildren<Text>().text = "Stop Tutorial";
+        //    IsTutorial = true;
+        //    UICaptionControls.SetActive(true);
+        //}
     }
 
     
@@ -592,14 +607,20 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && State == GameState.StickerInput)
         {
+            Debug.Log("Mouse button down and StickerInput state");
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         
             if (Physics.Raycast(ray, out hit))
             {
-                GameObject hitObject = hit.transform.gameObject;
+                Debug.Log($"collider {hit.collider}");
+                //hit.collider.gameObject;
+                GameObject hitObject = hit.collider.gameObject;// hit.transform.gameObject;
+                Debug.Log($"Raycast hit {hitObject}");
+
+
 
                 // Only want to take any action if the thing is visible
                 // This will prevent clicking on invisible projections:
@@ -661,18 +682,37 @@ public class GameManager : MonoBehaviour
 
     void SetGameState( GameState newState )
     {
+        if (newState == this.State)
+            return;
+        
+        PreviousState = State;
+        State = newState;
+
         switch (newState)
         {
             case GameState.StickerInput:
+                UICubeControls.SetActive(false);
+                UICaptionArea.SetActive(false);
+                UIInputControls.SetActive(true);
                 break;
             case GameState.SolutionView:
+                UICubeControls.SetActive(true);
+                UICaptionArea.SetActive(true);
+                UIInputControls.SetActive(false);
                 break;
             case GameState.FreeRotation:
+                UICubeControls.SetActive(true);
+                UICaptionArea.SetActive(false);
+                UIInputControls.SetActive(false);
+                break;
+            case GameState.Tutorial:
+                UICubeControls.SetActive(false);
+                UICaptionArea.SetActive(true);
+                UIInputControls.SetActive(false);
                 break;
             default:
                 break;
         }
-        State = newState;
     }
 
     public void PauseRotationSequence()

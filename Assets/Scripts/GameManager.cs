@@ -48,13 +48,14 @@ public class GameManager : MonoBehaviour
     public Text TutorialContent;
     public Button HelpButton;
     public Slider SpeedSlider;
-
+    public Toggle ProjectionToggle;
 
     public GameObject UIBase;
     public GameObject UICubeControls;
     public GameObject UICaptionArea;
     public GameObject UICaptionControls;
     public GameObject UIInputControls;
+    public GameObject UIGameOverPanel;
 
 
     // Rotation Sequence stuff
@@ -135,12 +136,18 @@ public class GameManager : MonoBehaviour
         SetColor("unknown");
     }
 
+    public void SetShowProjections()
+    {
+        ShowProjections = ProjectionToggle.isOn;
+    }
+
     public void ExplodeAndExit()
     {
         PauseRotationSequence();
 
         this.StopAllCoroutines();
         //Cube.StopAllCoroutines();
+        UIGameOverPanel.SetActive(true);
         StartCoroutine(ExplodeCubeCoroutine(false));
     }
 
@@ -152,6 +159,51 @@ public class GameManager : MonoBehaviour
         this.StopAllCoroutines();
         //Cube.StopAllCoroutines();
         StartCoroutine(ExplodeCubeCoroutine());
+    }
+
+    public IEnumerator FadeOutAndExit()
+    {
+        Image image = UIGameOverPanel.GetComponent<Image>();
+        Color color = image.color;
+        color.a = 0f;
+        image.color = color;
+        //UIGameOverPanel.SetActive(true);
+
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        while (color.a <= 1f)
+        {
+            color = image.color;
+            color.a = color.a + .01f;
+            image.color = color;
+
+            yield return new WaitForSeconds(.01f);
+        }
+
+        yield return new WaitForSecondsRealtime(.2f);
+
+        Text text = UIGameOverPanel.GetComponentInChildren<Text>();
+
+        text.text = "THANK YOU\nFOR PLAYING";
+
+        color = text.color;
+
+        while (color.a <= 1f)
+        {
+            color = text.color;
+            color.a = color.a + .01f;
+            text.color = color;
+
+            yield return new WaitForSeconds(.01f);
+        }
+
+        yield return new WaitForSecondsRealtime(1f);
+
+
+        //GameObject newPanel = Instantiate(UIGameOverPanel);
+        //newPanel.SetActive(true);
+        Application.Quit();
+        yield break;
     }
     public IEnumerator ExplodeCubeCoroutine(bool exitAfterExploding = true)
     {
@@ -188,12 +240,12 @@ public class GameManager : MonoBehaviour
 
         if (!exitAfterExploding)
         {
-            yield return new WaitForSecondsRealtime(2.5f);
-            Application.Quit();
+            yield return new WaitForSecondsRealtime(1.5f);
+            StartCoroutine(FadeOutAndExit());
+            yield break;
         }
         
 
-        yield break;
 
         //var newCube = Instantiate(Cube);
 
@@ -313,7 +365,10 @@ public class GameManager : MonoBehaviour
 
     public void StartStickerInput()
     {
-        SetGameState(GameState.StickerInput);
+        if (State == GameState.StickerInput)
+            SetGameState(PreviousState);
+        else
+            SetGameState(GameState.StickerInput);
     }
     public void FinishStickerInput()
     {
@@ -710,22 +765,31 @@ public class GameManager : MonoBehaviour
         {
             case GameState.StickerInput:
                 UICubeControls.SetActive(false);
-                UICaptionArea.SetActive(false);
+                UICaptionArea.SetActive(true);
+                UICaptionControls.SetActive(false);
                 UIInputControls.SetActive(true);
                 break;
             case GameState.SolutionView:
                 UICubeControls.SetActive(true);
                 UICaptionArea.SetActive(true);
+                UICaptionControls.SetActive(false);
+
                 UIInputControls.SetActive(false);
+                FindSolution();
+
                 break;
             case GameState.FreeRotation:
                 UICubeControls.SetActive(true);
                 UICaptionArea.SetActive(false);
+                UICaptionControls.SetActive(false);
+
                 UIInputControls.SetActive(false);
                 break;
             case GameState.Tutorial:
                 UICubeControls.SetActive(false);
                 UICaptionArea.SetActive(true);
+                UICaptionControls.SetActive(true);
+
                 UIInputControls.SetActive(false);
                 break;
             default:
@@ -774,9 +838,8 @@ public class GameManager : MonoBehaviour
         SetRotationSequence();
     }
 
-    public void GenerateSolutionButtonClicked()
+    private void FindSolution()
     {
-        Debug.Log("Generate solution button clicked");
         LogicalCube.Cube logicalCube = new LogicalCube.Cube(Cube.CanonicalString);
         LogicalCube.Solution solution = new LogicalCube.Solution(logicalCube);
 
@@ -784,21 +847,40 @@ public class GameManager : MonoBehaviour
         List<PhysicalCube.CubeRotation> solutionSteps = new List<PhysicalCube.CubeRotation>();
 
         // Create new CubeRotation for each move, preserving the captions
-        foreach( var move in solution.moveList )
+        foreach (var move in solution.moveList)
         {
             solutionSteps.Add(new PhysicalCube.CubeRotation(move.MoveString, move.CaptionHeader, move.CaptionText));
         }
 
         PhysicalCube.RotationSequence solutionSequence = new PhysicalCube.RotationSequence(solutionSteps);
+        SetRotationSequence(solutionSequence);
 
         MoveInputField.text = solution.ToString();
+    }
+    public void GenerateSolutionButtonClicked()
+    {
+        if (State == GameState.SolutionView)
+            SetGameState(PreviousState);
+        else
+            SetGameState(GameState.SolutionView);
 
-        Debug.Log($"Solution sequence: {solutionSequence}");
-
-        SetRotationSequence(solutionSequence);
-        
-
-        Debug.Log($"SOLUTION length: {solution.moveList.Count}    ToString: {solution}");
+        //FindSolution();
+        //Debug.Log("Generate solution button clicked");
+        //LogicalCube.Cube logicalCube = new LogicalCube.Cube(Cube.CanonicalString);
+        //LogicalCube.Solution solution = new LogicalCube.Solution(logicalCube);
+        //
+        //
+        //List<PhysicalCube.CubeRotation> solutionSteps = new List<PhysicalCube.CubeRotation>();
+        //
+        //// Create new CubeRotation for each move, preserving the captions
+        //foreach( var move in solution.moveList )
+        //{
+        //    solutionSteps.Add(new PhysicalCube.CubeRotation(move.MoveString, move.CaptionHeader, move.CaptionText));
+        //}
+        //
+        //PhysicalCube.RotationSequence solutionSequence = new PhysicalCube.RotationSequence(solutionSteps);
+        //
+        //MoveInputField.text = solution.ToString();
     }
 
 

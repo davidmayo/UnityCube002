@@ -151,21 +151,23 @@ public class GameManager : MonoBehaviour
         this.StopAllCoroutines();
         //Cube.StopAllCoroutines();
         UIGameOverPanel.SetActive(true);
-        StartCoroutine(ExplodeCubeCoroutine(false));
+        StartCoroutine(ExplodeCubeCoroutine(true));
     }
 
     // Kaaaa-BOOOOOOM!!
-    public void ExplodeCube()
-    {
-        PauseRotationSequence();
-
-        this.StopAllCoroutines();
-        //Cube.StopAllCoroutines();
-        StartCoroutine(ExplodeCubeCoroutine());
-    }
+    //public void ExplodeCube()
+    //{
+    //    PauseRotationSequence();
+    //
+    //    this.StopAllCoroutines();
+    //    //Cube.StopAllCoroutines();
+    //    StartCoroutine(ExplodeCubeCoroutine());
+    //}
 
     public IEnumerator FadeOutAndExit()
     {
+        yield return new WaitForSecondsRealtime(1.5f);
+
         Image image = UIGameOverPanel.GetComponent<Image>();
         Color color = image.color;
         color.a = 0f;
@@ -241,9 +243,8 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (!exitAfterExploding)
+        if (exitAfterExploding)
         {
-            yield return new WaitForSecondsRealtime(1.5f);
             StartCoroutine(FadeOutAndExit());
             yield break;
         }
@@ -733,6 +734,10 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Easter egg: SHIFT + ALT + X = infinitely exploding cube
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.X))
+            StartCoroutine(ExplodeCubeCoroutine(false));
+
         UpdateStickerColor();
         ContinueRotationSequence();
 

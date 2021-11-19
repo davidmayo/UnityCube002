@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 /// <summary>
 /// The main coordinating class of the program, handling program state, user interface, etc.
@@ -93,7 +94,9 @@ public class GameManager : MonoBehaviour
 
         Cube.SetCubeFromCanonicalString(StartingPosition);
         //Cube.SetCubeFromCanonicalString("GGWOYYGWY/RGBWRYOGW/ROOBGRRRB/GOOGOYRRY/YWYRBBBBW/BYGOWWOBW");
+
         SetGameState(GameState.FreeRotation);
+        PreviousState = GameState.FreeRotation;
 
         MoveInputField.text = DefaultSequence;
         //MoveInputField.text = "x2 y D D D F2 y D F2 y y y F D F' y y D F2 y D D D D R F' R' x2 R U R' U' R U R' U' R U R' U' R U R' U' R U R' U' y y y R U R' U' R U R' U' y y y U U R U R' U' R U R' U' R U R' U' y y y U U R U R' U' R U R' U' R U R' U' R U R' U' R U R' U' y y y U2 F' U' F U R U R' y y U2 F' U' F U R U R' y U U U2 F' U' F U R U R' y y F R U R' U' F' F R U R' U' F' U U U U y R U R' U R U2 R' U U R U' L' U R' U' L y U R U' L' U R' U' L x2 y y y y R U R' U' R U R' U' D R U R' U' R U R' U' D R U R' U' R U R' U' D D x2 y2 z2 x2 y2 z2";
@@ -504,29 +507,29 @@ public class GameManager : MonoBehaviour
         // Ready to start the rotation
         Debug.Log($"Starting rotation {rotation} HEADER: {rotation.CaptionHeaderText} BODY: {rotation.CaptionBodyText}");
 
-        // Update the caption, UNLESS it's in tutorial mode.
-        if (!IsTutorial)
-        {
-            if (!string.IsNullOrWhiteSpace(rotation.CaptionHeaderText))
-            {
-                TutorialHeader.text = rotation.CaptionHeaderText;
-            }
-            else
-            {
-                TutorialHeader.text = rotation.MoveString;
-            }
-
-
-            if (!string.IsNullOrWhiteSpace(rotation.CaptionBodyText))
-            {
-                TutorialContent.text = rotation.CaptionBodyText;
-            }
-            else
-            {
-                TutorialContent.text = "Do move: " + rotation.MoveString;
-            }
-
-        }
+        //// Update the caption, UNLESS it's in tutorial mode.
+        //if (!IsTutorial)
+        //{
+        //    if (!string.IsNullOrWhiteSpace(rotation.CaptionHeaderText))
+        //    {
+        //        TutorialHeader.text = rotation.CaptionHeaderText;
+        //    }
+        //    else
+        //    {
+        //        TutorialHeader.text = rotation.MoveString;
+        //    }
+        //
+        //
+        //    if (!string.IsNullOrWhiteSpace(rotation.CaptionBodyText))
+        //    {
+        //        TutorialContent.text = rotation.CaptionBodyText;
+        //    }
+        //    else
+        //    {
+        //        TutorialContent.text = "Do move: " + rotation.MoveString;
+        //    }
+        //
+        //}
         // Do the rotation coroutine
         yield return StartCoroutine(Cube.RotateCoroutine(rotation));
 
@@ -710,9 +713,16 @@ public class GameManager : MonoBehaviour
 
                         Cube.SetCubeFromCanonicalString(forcedCube);
                         UpdateCanonicalString();
+
+                        int unknownCount = Cube.CanonicalString.Count(f => f == 'X');
+                        int knownCount = 54 - unknownCount;
+
+                        TutorialContent.text = $"So far so good.\n\n{knownCount} stickers determined.\n\n{unknownCount} stickers to go.";
+
                     }
                     catch (Exception exc)
                     {
+                        TutorialContent.text = $"Uh-oh!\n\nThis cube is impossible.";
                         Debug.Log($"EXCEPTION: {exc}");
                     }
                 }
@@ -724,9 +734,10 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         UpdateStickerColor();
-            
+        ContinueRotationSequence();
 
-            
+
+
         //UpdateCanonicalString();
         //switch (this.State)
         //{
@@ -753,6 +764,13 @@ public class GameManager : MonoBehaviour
         Cube.ShowProjections = this.ShowProjections;
     }
 
+    public void FreeRotateButtonClicked()
+    {
+        if (State == GameState.FreeRotation)
+            SetGameState(PreviousState);
+        else
+            SetGameState(GameState.FreeRotation);
+    }
     void SetGameState( GameState newState )
     {
         if (newState == this.State)
@@ -764,6 +782,11 @@ public class GameManager : MonoBehaviour
         switch (newState)
         {
             case GameState.StickerInput:
+                TutorialHeader.text = "Edit cube state";
+                TutorialContent.text = "Set the colors of these stickers to match your actual cube.\n\n" + 
+                    "Start with a preset state on the left, then select a color from the right and start clicking on the cube.\n\n" +
+                    "I will start to magically figure out some stickers as you go.";
+
                 UICubeControls.SetActive(false);
                 UICaptionArea.SetActive(true);
                 UICaptionControls.SetActive(false);
@@ -779,10 +802,15 @@ public class GameManager : MonoBehaviour
 
                 break;
             case GameState.FreeRotation:
+                TutorialHeader.text = "Free Rotation";
+                TutorialContent.text = "Rotate the cube however you'd like. Controls:\n\n" +
+                    "Hold SHIFT to rotate counterclockwise. Otherwise, rotation will be clockwise.\n\n" +
+                    "          U = Upper        D = Down face\n" +
+                    "          F = Front          B = Back face\n" +
+                    "          R = Right          L = Left face\n";
                 UICubeControls.SetActive(true);
-                UICaptionArea.SetActive(false);
+                UICaptionArea.SetActive(true);
                 UICaptionControls.SetActive(false);
-
                 UIInputControls.SetActive(false);
                 break;
             case GameState.Tutorial:
@@ -840,9 +868,22 @@ public class GameManager : MonoBehaviour
 
     private void FindSolution()
     {
-        LogicalCube.Cube logicalCube = new LogicalCube.Cube(Cube.CanonicalString);
-        LogicalCube.Solution solution = new LogicalCube.Solution(logicalCube);
+        TutorialHeader.text = "Finding solution . . . ";
+        TutorialContent.text = "";
 
+        LogicalCube.Cube logicalCube = new LogicalCube.Cube(Cube.CanonicalString);
+
+        LogicalCube.Solution solution;
+        try
+        {
+            solution = new LogicalCube.Solution(logicalCube);
+            TutorialContent.text = "Found a valid solution.\n\nLet's get started!";
+        }
+        catch
+        {
+            TutorialContent.text = "That cube is not solvable.\n\nPlease double-check that you entered in your cube correctly. If you did, then you will need to take your cube apart and reassemble it.";
+            return;
+        }
 
         List<PhysicalCube.CubeRotation> solutionSteps = new List<PhysicalCube.CubeRotation>();
 
@@ -859,30 +900,8 @@ public class GameManager : MonoBehaviour
     }
     public void GenerateSolutionButtonClicked()
     {
-        if (State == GameState.SolutionView)
-            SetGameState(PreviousState);
-        else
-            SetGameState(GameState.SolutionView);
-
-        //FindSolution();
-        //Debug.Log("Generate solution button clicked");
-        //LogicalCube.Cube logicalCube = new LogicalCube.Cube(Cube.CanonicalString);
-        //LogicalCube.Solution solution = new LogicalCube.Solution(logicalCube);
-        //
-        //
-        //List<PhysicalCube.CubeRotation> solutionSteps = new List<PhysicalCube.CubeRotation>();
-        //
-        //// Create new CubeRotation for each move, preserving the captions
-        //foreach( var move in solution.moveList )
-        //{
-        //    solutionSteps.Add(new PhysicalCube.CubeRotation(move.MoveString, move.CaptionHeader, move.CaptionText));
-        //}
-        //
-        //PhysicalCube.RotationSequence solutionSequence = new PhysicalCube.RotationSequence(solutionSteps);
-        //
-        //MoveInputField.text = solution.ToString();
+        SetGameState(GameState.SolutionView);
     }
-
 
     public void FlipCube()
     {
@@ -988,7 +1007,36 @@ public class GameManager : MonoBehaviour
 
     private void ProcessFreeRotation()
     {
-        ContinueRotationSequence();
+        if (State != GameState.FreeRotation || !Cube.IsReadyToRotate)
+            return;
+
+        bool invertDirection = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+        string moveString = "";
+
+        if (Input.GetKeyDown(KeyCode.U))
+            moveString = "U";
+        else if (Input.GetKeyDown(KeyCode.D))
+            moveString = "D";
+
+        else if (Input.GetKeyDown(KeyCode.F))
+            moveString = "F";
+        else if (Input.GetKeyDown(KeyCode.B))
+            moveString = "B";
+
+        else if (Input.GetKeyDown(KeyCode.L))
+            moveString = "L";
+        else if (Input.GetKeyDown(KeyCode.R))
+            moveString = "R";
+
+        if (moveString == "")
+            return;
+
+        if (invertDirection)
+            moveString += "'";
+
+        PhysicalCube.CubeRotation rotation = new PhysicalCube.CubeRotation(moveString);
+        this.RotateCube(rotation);
     }
 
     private void ProcessSolutionView()

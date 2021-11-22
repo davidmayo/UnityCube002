@@ -243,15 +243,6 @@ namespace LogicalCube
             this.squares[destinationIndex] = tempChar;
         }
 
-        /// <summary>
-        /// Actually transform the Cube object
-        /// </summary>
-        /// <param name="move"></param>
-        //public void MakeMove( Move move )
-        //{
-        //    MakeMove(move.Cycles);
-        //}
-
         public void MakeMove(Move move )
         {
             MakeMove(move.Cycles);

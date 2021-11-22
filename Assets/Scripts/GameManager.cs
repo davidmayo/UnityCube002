@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     [Header("Cube")]
 
     public string StartingPosition = "WWWWWWWWW/GGGGGGGGG/RRRRRRRRR/BBBBBBBBB/OOOOOOOOO/YYYYYYYYY";
-    public string DefaultSequence = "M'2 U M'2 U2 M'2 U M'2";
+    public string DefaultSequence = "";
     [Header("Rotation")]
     [Range(0f,10800f)]
     public float RotationSpeedDegreesPerSecond = 135f;
@@ -64,7 +64,9 @@ public class GameManager : MonoBehaviour
     [Header("Debug stuff")]
 
     public string DebugString;
-    private string currentRotationStartPosition;
+    public string currentRotationStartPosition;
+    public string currentRotationFinishPosition;
+
     //[SerializeField]
     //private RotationSequence unalteredRotationSequence;
     [SerializeField]
@@ -90,6 +92,7 @@ public class GameManager : MonoBehaviour
     {
         currentRotationSequence = new PhysicalCube.RotationSequence("");
         currentRotationStartPosition = StartingPosition;
+        currentRotationFinishPosition = StartingPosition;
         rotationSequenceInProgress = false;
         isPaused = false;
 
@@ -820,7 +823,7 @@ public class GameManager : MonoBehaviour
                     "          U = Upper        D = Down face\n" +
                     "          F = Front          B = Back face\n" +
                     "          R = Right          L = Left face\n";
-                UICubeControls.SetActive(false);
+                UICubeControls.SetActive(true);
                 UICaptionArea.SetActive(true);
                 UICaptionControls.SetActive(false);
                 UIInputControls.SetActive(false);
@@ -863,6 +866,12 @@ public class GameManager : MonoBehaviour
     public void SetRotationSequence(PhysicalCube.RotationSequence solutionSequence)
     {
         currentRotationStartPosition = Cube.CanonicalString;
+
+        // Get final string
+        LogicalCube.Cube logicalCube = new LogicalCube.Cube(Cube.CanonicalString);
+        logicalCube.MakeMove(solutionSequence.GetMovesString());
+        currentRotationFinishPosition = logicalCube.ToCanonicalString();
+
         //unalteredRotationSequence = new RotationSequence(MoveInputField.text);
         currentRotationSequence = solutionSequence;
         isCurrentlyReversed = false;
@@ -873,6 +882,12 @@ public class GameManager : MonoBehaviour
         currentRotationStartPosition = Cube.CanonicalString;
         //unalteredRotationSequence = new RotationSequence(MoveInputField.text);
         currentRotationSequence = new PhysicalCube.RotationSequence(moveSequenceString);
+
+        // Get final string
+        LogicalCube.Cube logicalCube = new LogicalCube.Cube(Cube.CanonicalString);
+        logicalCube.MakeMove(currentRotationSequence.GetMovesString());
+        currentRotationFinishPosition = logicalCube.ToCanonicalString();
+
         isCurrentlyReversed = false;
     }
 
@@ -962,6 +977,22 @@ public class GameManager : MonoBehaviour
         //Debug.Log(sequenceToPlay);
         isPaused = false;
         StartRotationSequence();
+    }
+
+    /// <summary>
+    /// Jump immediately to end of current sequence. Called by "Jump To End" button
+    /// </summary>
+    public void JumpToSequenceEnd()
+    {
+        if (!Cube.IsReadyToRotate)
+        {
+            return;
+        }
+
+        //Cube.StartRotation(null, true);
+        Cube.SetCubeFromCanonicalString(currentRotationFinishPosition);
+        UpdateCanonicalString();
+        currentRotationSequence.MoveToEnd();
     }
 
     public void ResetSequence()

@@ -155,6 +155,21 @@ namespace PhysicalCube
         }
 
         /// <summary>
+        /// Get all the moves as a string in standard notation
+        /// </summary>
+        /// <returns></returns>
+        public string GetMovesString()
+        {
+            string returnValue = "";
+            foreach (var rotation in Sequence)
+            {
+                returnValue += rotation.MoveString + " ";
+            }
+            return returnValue.Trim();
+
+        }
+
+        /// <summary>
         /// Return all the properties as a string.
         /// </summary>
         /// <returns></returns>
@@ -177,7 +192,7 @@ namespace PhysicalCube
         /// </summary>
         public void MoveToEnd()
         {
-            index = Count - 1;
+            index = Count;
         }
 
         /// <summary>

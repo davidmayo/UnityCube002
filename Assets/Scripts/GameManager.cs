@@ -826,6 +826,8 @@ public class GameManager : MonoBehaviour
                 UIInputControls.SetActive(false);
                 break;
             case GameState.Tutorial:
+                TutorialHeader.text = "Tutorial";
+                TutorialContent.text = "Use the buttons above to navigate through the tutorial.";
                 UICubeControls.SetActive(false);
                 UICaptionArea.SetActive(true);
                 UICaptionControls.SetActive(true);

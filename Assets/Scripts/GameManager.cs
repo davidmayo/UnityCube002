@@ -17,7 +17,8 @@ public class GameManager : MonoBehaviour
         StickerInput,
         SolutionView,
         FreeRotation,
-        Tutorial
+        Tutorial,
+        EasterEgg
     }
     public GameState State { get; private set; }
     public GameState PreviousState { get; private set; }
@@ -736,7 +737,8 @@ public class GameManager : MonoBehaviour
     {
         // Easter egg: SHIFT + ALT + X = infinitely exploding cube
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.X))
-            StartCoroutine(ExplodeCubeCoroutine(false));
+            SetGameState(GameState.EasterEgg);
+            //StartCoroutine(ExplodeCubeCoroutine(false));
 
         UpdateStickerColor();
         ContinueRotationSequence();
@@ -788,7 +790,7 @@ public class GameManager : MonoBehaviour
         {
             case GameState.StickerInput:
                 TutorialHeader.text = "Edit cube state";
-                TutorialContent.text = "Set the colors of these stickers to match your actual cube.\n\n" + 
+                TutorialContent.text = "Set the colors of these stickers to match your actual cube.\n\n" +
                     "Start with a preset state on the left, then select a color from the right and start clicking on the cube.\n\n" +
                     "I will start to magically figure out some stickers as you go.";
 
@@ -813,7 +815,7 @@ public class GameManager : MonoBehaviour
                     "          U = Upper        D = Down face\n" +
                     "          F = Front          B = Back face\n" +
                     "          R = Right          L = Left face\n";
-                UICubeControls.SetActive(true);
+                UICubeControls.SetActive(false);
                 UICaptionArea.SetActive(true);
                 UICaptionControls.SetActive(false);
                 UIInputControls.SetActive(false);
@@ -824,6 +826,10 @@ public class GameManager : MonoBehaviour
                 UICaptionControls.SetActive(true);
 
                 UIInputControls.SetActive(false);
+                break;
+            case GameState.EasterEgg:
+                this.StopAllCoroutines();
+                StartCoroutine(ExplodeCubeCoroutine(false));
                 break;
             default:
                 break;

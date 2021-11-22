@@ -496,6 +496,11 @@ public class GameManager : MonoBehaviour
 
     private void RotateCube(PhysicalCube.CubeRotation rotation)
     {
+        if( State == GameState.SolutionView )
+        {
+            this.TutorialHeader.text = rotation.CaptionHeaderText;
+            this.TutorialContent.text = rotation.CaptionBodyText;
+        }
         StartCoroutine(RotateCubeCoroutine(rotation));
     }
     IEnumerator RotateCubeCoroutine(PhysicalCube.CubeRotation rotation)

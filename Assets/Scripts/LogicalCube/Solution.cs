@@ -600,6 +600,7 @@ namespace LogicalCube
         // Precondition: edgePiece is given to be solved where [0] is the FRONT side
         private void SolveMiddleLayerEdge(string edgePiece)
         {
+            string captionHeader = "3. Solve middle layer edges";
             char desiredFrontColor = edgePiece[0];
             bool isMiddleLayer = _cube.FindPiece(edgePiece).IsMiddleLayer();
             //Console.WriteLine("  isMiddleLayer = {0}", isMiddleLayer);
@@ -608,7 +609,9 @@ namespace LogicalCube
                 // Rotate until PIECE is in FR position
                 while (!_cube.FindPiece(edgePiece).IsSamePiece(Square.FR))
                 {
-                    AddMoveToSolution("y", "Move target piece " + edgePiece + " to FR position.");
+                    AddMoveToSolution("y",
+                        captionHeader,
+                        "Rotate the cube until " + GetPieceString( edgePiece )+ " is in FRONT / RIGHT position.");
                 }
 
                 // Piece is in correct position IFF := (F.color == desiredFrontColor)
@@ -626,11 +629,16 @@ namespace LogicalCube
                     // Rotate until PIECE is in FR position
                     while (!_cube.FindPiece(edgePiece).IsSamePiece(Square.FR))
                     {
-                        AddMoveToSolution("y", "Rotate cube until target piece " + edgePiece + " to FR position.");
+                        AddMoveToSolution("y",
+                            captionHeader,
+                            "Rotate the cube until " + GetPieceString(edgePiece) + " is in FRONT / RIGHT position.");
+
                     }
 
                     // Do R U R' U' F' U' F to put it into the top layer
-                    AddMoveToSolution("R U R' U' F' U' F", "Move target piece " + edgePiece + " to TOP layer position.");
+                    AddMoveToSolution("R U R' U' F' U' F",
+                        captionHeader,
+                        "Move target piece " + GetPieceString(edgePiece) + " to TOP layer.");
 
                     // Recursively call
                     SolveMiddleLayerEdge(edgePiece);
@@ -642,13 +650,17 @@ namespace LogicalCube
                 // This will occur when F.color == desiredFrontColor
                 while (_cube[Square.F] != desiredFrontColor)
                 {
-                    AddMoveToSolution("y", "Rotate cube until " + edgePiece + " DESTINATION is in FR position.");
+                    AddMoveToSolution("y",
+                        captionHeader,
+                        "Rotate cube until the slot for " + GetPieceString(edgePiece) + " is in FRONT / RIGHT position.");
                 }
 
                 // Rotate upper face until piece is in FU position
                 while (!_cube.FindPiece(edgePiece).IsSamePiece(Square.FU))
                 {
-                    AddMoveToSolution("U", "Move target piece " + edgePiece + " into FU position.");
+                    AddMoveToSolution("U",
+                        captionHeader, 
+                        "Move target piece " + GetPieceString(edgePiece) + " into FRONT / UPPER position.");
                 }
 
 
@@ -659,22 +671,27 @@ namespace LogicalCube
                 if( isAlignedForLeftUpperInsertion)
                 {
                     // Do U to place in LEFT upper position
-                    AddMoveToSolution("U", "Move target piece " + edgePiece + " into position to be inserted in the front.");
+                    AddMoveToSolution("U",
+                        captionHeader,
+                        "Move target piece " + GetPieceString(edgePiece) + " into position to be inserted in the front.");
 
 
                     // Do R U R' U' F' U' F to solve edge
-                    AddMoveToSolution("R U R' U' F' U' F", "Solve " + edgePiece + ".");
-
-                    // TODO
+                    AddMoveToSolution("R U R' U' F' U' F",
+                        captionHeader,
+                        "Solve " + GetPieceString(edgePiece) + " edge.");
                 }
                 else
                 {
                     // Do U2 to place in BACK upper position
-                    AddMoveToSolution("U2", "Move target piece " + edgePiece + " into position to be inserted in the front.");
+                    AddMoveToSolution("U2",
+                        captionHeader,
+                        "Move target piece " + edgePiece + " into position to be inserted in the front.");
 
                     // Do F' U' F U R U R' to solve edge
-                    AddMoveToSolution("F' U' F U R U R'", "Solve " + edgePiece + ".");
-                    // TODO
+                    AddMoveToSolution("F' U' F U R U R'",
+                        captionHeader,
+                        "Solve " + GetPieceString(edgePiece) + " edge.");
                 }
 
 

@@ -278,6 +278,7 @@ namespace LogicalCube
 
         private void PermuteYellowEdges()
         {
+            string captionHeader = "5: Solve yellow edges";
             // These are the pairs of squares to look at for counting how many 
             // HACKY: List of tuples
             List<(Square, Square)> edgeAdjacentFaceTuples = new List<(Square,Square)>()
@@ -294,7 +295,9 @@ namespace LogicalCube
 
             while (!isCorrectAlignment)
             {
-                AddMoveToSolution("U", "Rotate U until at least two edges are correctly positioned.");
+                AddMoveToSolution("U",
+                    captionHeader,
+                    "Rotate UPPER face until at least two edges are correctly positioned.");
 
                 solvedEdges = 0;
                 foreach (var edgeAdjacentFace in edgeAdjacentFaceTuples)
@@ -343,11 +346,15 @@ namespace LogicalCube
                     // i.e., until BU.color == B.color && RU.color == R.color
                     while (!(_cube[Square.BU] == _cube[Square.B] && _cube[Square.RU] == _cube[Square.R]))
                     {
-                        AddMoveToSolution("y", "Two edges next to each other are in the correct position. Rotate the cube until the solved edges are BU and RU.");
+                        AddMoveToSolution("y",
+                            captionHeader,
+                            "Two edges next to each other are in the correct position.\n\nRotate the cube until the solved edges are on the BACK and RIGHT faces.");
                     }
 
                     // Do R U R' U R U2 R' U to solve the edges
-                    AddMoveToSolution("R U R' U R U2 R' U", "Solve the edges.");
+                    AddMoveToSolution("R U R' U R U2 R' U",
+                        captionHeader,
+                        "Do the algorithm to solve the edges.");
 
 
                 }
@@ -356,7 +363,10 @@ namespace LogicalCube
                     // I case
 
                     // Do R U R' U R U2 R' U to transform to V case
-                    AddMoveToSolution("R U R' U R U2 R' U", "Two edges across from each other are in the correct position. Transform to having two edges next to each other in correct position.");
+                    AddMoveToSolution("R U R' U R U2 R' U",
+                        captionHeader,
+                        "Two edges across from each other are in the correct position.\n\n" +
+                            "Do the algorithm to transform to having two edges next to each other in correct position.");
 
                     // Recursive call
                     PermuteYellowEdges();
@@ -615,10 +625,9 @@ namespace LogicalCube
         // Precondition: edgePiece is given to be solved where [0] is the FRONT side
         private void SolveMiddleLayerEdge(string edgePiece)
         {
-            string captionHeader = "3. Solve middle layer edges";
+            string captionHeader = "3: Solve middle layer edges";
             char desiredFrontColor = edgePiece[0];
             bool isMiddleLayer = _cube.FindPiece(edgePiece).IsMiddleLayer();
-            //Console.WriteLine("  isMiddleLayer = {0}", isMiddleLayer);
             if ( isMiddleLayer )
             {
                 // Rotate until PIECE is in FR position
@@ -647,7 +656,6 @@ namespace LogicalCube
                         AddMoveToSolution("y",
                             captionHeader,
                             "Rotate the cube until " + GetPieceString(edgePiece) + " is in FRONT / RIGHT position.");
-
                     }
 
                     // Do R U R' U' F' U' F to put it into the top layer

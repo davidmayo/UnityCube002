@@ -274,8 +274,6 @@ namespace LogicalCube
             Square targetPieceLocation = _cube.FindPiece(targetPieceString);
 
             return targetPieceLocation == Square.DFR;
-
-            // Determine if it's the correct orientation
         }
 
         private void PermuteYellowEdges()
@@ -321,7 +319,7 @@ namespace LogicalCube
                 // UNSOLVABLE CUBE
                 // I don't think either case can ever happen on a cube that has passed piece validation
                 // But I'm not totally sure
-                // TODO
+                // Either way, don't do anything.
             }
             else if( solvedEdges == 2 )
             {
@@ -376,6 +374,7 @@ namespace LogicalCube
         // Precondition: UP is YELLOW
         private void OrientYellowEdges()
         {
+            string captionHeader = "4: Make yellow cross";
             // Make UPPER be YELLOW
             Square yellowCenter = _cube.FindPiece("Y");
 
@@ -386,27 +385,37 @@ namespace LogicalCube
             else if( yellowCenter == Square.D)
             {
                 // Do an x2
-                AddMoveToSolution("x2", "Flip the cube so that the YELLOW side is UP");
+                AddMoveToSolution("x2",
+                    captionHeader,
+                    "Flip the cube so that the YELLOW side is UP");
             }
             else if (yellowCenter == Square.F)
             {
                 // Do an x
-                AddMoveToSolution("x", "Flip the cube so that the YELLOW side is UP");
+                AddMoveToSolution("x",
+                    captionHeader,
+                    "Flip the cube so that the YELLOW side is UP");
             }
             else if (yellowCenter == Square.R)
             {
                 // Do a z'
-                AddMoveToSolution("z'", "Flip the cube so that the YELLOW side is UP");
+                AddMoveToSolution("z'",
+                    captionHeader,
+                    "Flip the cube so that the YELLOW side is UP");
             }
             else if (yellowCenter == Square.B)
             {
                 // Do an x'
-                AddMoveToSolution("x'", "Flip the cube so that the YELLOW side is UP");
+                AddMoveToSolution("x'",
+                    captionHeader,
+                    "Flip the cube so that the YELLOW side is UP");
             }
             else if (yellowCenter == Square.L)
             {
                 // Do a z
-                AddMoveToSolution("z", "Flip the cube so that the YELLOW side is UP");
+                AddMoveToSolution("z",
+                    captionHeader,
+                    "Flip the cube so that the YELLOW side is UP");
             }
             else
             {
@@ -440,7 +449,9 @@ namespace LogicalCube
             else if( correctlyOrientedEdgeCount == 0)
             {
                 // Do the alg
-                AddMoveToSolution("F R U R' U' F'", "Do the edge OLL algorithm");
+                AddMoveToSolution("F R U R' U' F'",
+                    captionHeader,
+                    "None of the YELLOW edges are oriented. Do the algorithm to get two of them right.");
 
                 // Call recursively
                 OrientYellowEdges();
@@ -459,15 +470,15 @@ namespace LogicalCube
                 // Rotate until solved edges are UR and UL
                 while(!(_cube[Square.UR] == 'Y' && _cube[Square.UL] == 'Y'))
                 {
-                    AddMoveToSolution("y", "This is an 'I' case. Turn the cube until the solved edges are on the LEFT and RIGHT side.");
+                    AddMoveToSolution("y",
+                        captionHeader,
+                        "This is an 'I' case. Turn the cube until the solved edges are on the LEFT and RIGHT side.");
                 }
 
                 // Do the alg
-                AddMoveToSolution("F R U R' U' F'", "Do the edge OLL algorithm");
-
-                // DEBUG: Does this fix it?
-                //OrientYellowEdges();
-
+                AddMoveToSolution("F R U R' U' F'",
+                    captionHeader,
+                    "Do the algorithm to get all four edges aligned.");
 
                 // Return
                 return;
@@ -478,11 +489,15 @@ namespace LogicalCube
                 // rotate until solved edges are UB and UL
                 while (!(_cube[Square.UB] == 'Y' && _cube[Square.UL] == 'Y'))
                 {
-                    AddMoveToSolution("y", "This is a 'V' case. Turn the cube until the solved edges are on the LEFT and BACK side.");
+                    AddMoveToSolution("y",
+                        captionHeader,
+                        "This is a 'V' case. Turn the cube until the solved edges are on the LEFT and BACK side.");
                 }
 
                 // Do alg
-                AddMoveToSolution("F R U R' U' F'", "Do the edge OLL algorithm");
+                AddMoveToSolution("F R U R' U' F'",
+                    captionHeader,
+                    "Do the algorithm to convert the 'V' case into an 'I' case.");
 
                 // Call recursively
                 OrientYellowEdges();

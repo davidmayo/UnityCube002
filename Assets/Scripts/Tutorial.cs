@@ -40,7 +40,7 @@ public class Tutorial : MonoBehaviour
         entry = new TutorialEntry
         {
             HeaderText = "Intro",
-            CaptionText = "This is the intro.\n\nThis is a new paragraph that is kind of long.",
+            CaptionText = "This tutorial will explain some facts about the cube.\n\nAnd show you the steps involved in solving it.",
             CubeCanonicalString = solvedCanonicalString,
             CubeSequence = "0"
         };
@@ -49,7 +49,7 @@ public class Tutorial : MonoBehaviour
         entry = new TutorialEntry
         {
             HeaderText = "Faces",
-            CaptionText = "The cube has six sides, called \"Faces\".\n\nThey're named after where they are in relation to you, the person holding the cube.",
+            CaptionText = "The cube has six sides, called \"Faces\".\n\nThey're referred to by their position on the cube as seen by you, the person holding the cube.",
             CubeCanonicalString = solvedCanonicalString,
             CubeSequence = "0"
         };
@@ -277,23 +277,23 @@ public class Tutorial : MonoBehaviour
         };
         entries.Add(entry);
 
-        entry = new TutorialEntry
-        {
-            HeaderText = "Four move sequence",
-            CaptionText = "Get used to this sequence, because you'll be using it a lot to solve your cube. Practice it!\n\nIf you do it 6 times in a row, the cube will end up back in the same state it started in.\n\n",
-            CubeCanonicalString = solvedCanonicalString,
-            CubeSequence = "0 R U R' U' 0 R U R' U' 0 R U R' U' 0 R U R' U' 0 R U R' U' 0 R U R' U'"
-        };
-        entries.Add(entry);
-
-        entry = new TutorialEntry
-        {
-            HeaderText = "Four move sequence",
-            CaptionText = "Good job!\n\nProbably better practice it a few more times, though. Again, you're going to be doing this A LOT.",
-            CubeCanonicalString = solvedCanonicalString,
-            CubeSequence = "0 R U R' U' 0 R U R' U' 0 R U R' U' 0 R U R' U' 0 R U R' U' 0 R U R' U'"
-        };
-        entries.Add(entry);
+        //entry = new TutorialEntry
+        //{
+        //    HeaderText = "Four move sequence",
+        //    CaptionText = "Get used to this sequence, because you'll be using it a lot to solve your cube. Practice it!\n\nIf you do it 6 times in a row, the cube will end up back in the same state it started in.\n\n",
+        //    CubeCanonicalString = solvedCanonicalString,
+        //    CubeSequence = "0 R U R' U' 0 R U R' U' 0 R U R' U' 0 R U R' U' 0 R U R' U' 0 R U R' U'"
+        //};
+        //entries.Add(entry);
+        //
+        //entry = new TutorialEntry
+        //{
+        //    HeaderText = "Four move sequence",
+        //    CaptionText = "Good job!\n\nProbably better practice it a few more times, though. Again, you're going to be doing this A LOT.",
+        //    CubeCanonicalString = solvedCanonicalString,
+        //    CubeSequence = "0 R U R' U' 0 R U R' U' 0 R U R' U' 0 R U R' U' 0 R U R' U' 0 R U R' U'"
+        //};
+        //entries.Add(entry);
 
         // Solution outline
         entry = new TutorialEntry

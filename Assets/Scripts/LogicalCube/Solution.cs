@@ -100,7 +100,7 @@ namespace LogicalCube
 
         private void PermuteYellowCorners()
         {
-            // TODO: Count correct corners
+            string captionHeader = "6: Place yellow corners";
             int correctlyPositionedCorners = 0;
 
             int rotationOffset = 0;
@@ -147,7 +147,10 @@ namespace LogicalCube
             if (correctlyPositionedCorners == 0)
             {
                 // Do U R U' L' U R' U' L
-                AddMoveToSolution("U R U' L' U R' U' L", "Do sequence until a corner is positioned correctly.");
+                AddMoveToSolution("U R U' L' U R' U' L",
+                    captionHeader,
+                    "All corners are in the wrong position.\n\n"+
+                    "Do sequence until a corner is positioned correctly.");
 
                 // Recursive call
                 PermuteYellowCorners();
@@ -161,7 +164,10 @@ namespace LogicalCube
                 while( !isUFRcorrect )
                 {
                     // Rotate cube
-                    AddMoveToSolution("y", "Rotate the cube until the UFR cubie is in the right position.");
+                    AddMoveToSolution("y",
+                        captionHeader,
+                        "One corner is in the correct position.\n\n"+
+                        "Rotate the cube until the correct corner is in the UPPER / FRONT position.");
 
                     correctCornerString = "" + _cube[Square.U] + _cube[Square.F] + _cube[Square.R];
                     isUFRcorrect = Square.UFR.IsSamePiece(_cube.FindPiece(correctCornerString));
@@ -169,7 +175,9 @@ namespace LogicalCube
 
 
                 // Do U R U' L' U R' U' L
-                AddMoveToSolution("U R U' L' U R' U' L", "Do sequence until all corners are positioned correctly.");
+                AddMoveToSolution("U R U' L' U R' U' L",
+                    captionHeader,
+                    "Do the sequence until all yellow corners are positioned correctly.");
 
                 // Recursive call
                 PermuteYellowCorners();
@@ -177,12 +185,10 @@ namespace LogicalCube
             else if (correctlyPositionedCorners == 2)
             {
                 // Impossible position.
-                // TODO
             }
             else if (correctlyPositionedCorners == 3)
             {
                 // Impossible position.
-                // TODO
             }
             else
             {

@@ -199,14 +199,17 @@ namespace LogicalCube
 
         private void OrientYellowCorners()
         {
+            string captionHeader = "7: Solve the cube!";
             // Flip cube so YELLOW is DOWN
-            if( _cube[Square.D] == 'Y')
+            if ( _cube[Square.D] == 'Y')
             {
                 ; // Do nothing
             }
             else if( _cube[Square.D] == 'W')
             {
-                AddMoveToSolution("x2", "Move YELLOW face to DOWN");
+                AddMoveToSolution("x2",
+                    captionHeader,
+                    "Flip the cube so that the YELLOW face is DOWN.");
             }
             else
             {
@@ -217,9 +220,22 @@ namespace LogicalCube
             int unsolvedCorners = 0;
             for ( int rotationCount = 0; rotationCount < 4; rotationCount++)
             {
-                AddMoveToSolution("y", "Rotate cube looking for solved DFR corners [This will be optimized away].");
+                AddMoveToSolution("y",
+                    captionHeader,
+                    "Check each yellow corner to see if it's already solved.");
                 if (!IsDFRsolved())
+                {
                     unsolvedCorners++;
+                    AddMoveToSolution("0",
+                        captionHeader,
+                        $"This corner is unsolved.\n\nTotal unsolved corners found: {unsolvedCorners}.");
+                }
+                else
+                {
+                    AddMoveToSolution("0",
+                        captionHeader,
+                        $"This corner is unsolved.\n\nTotal unsolved corners found: {unsolvedCorners}.");
+                }
             }
 
 
@@ -232,7 +248,6 @@ namespace LogicalCube
             else if( unsolvedCorners == 1 )
             {
                 // IMPOSSIBLE POSITION
-                // TODO
             }
             else
             {
@@ -254,17 +269,23 @@ namespace LogicalCube
                     while( !IsDFRsolved() )
                     {
                         // If DFR is not solved, do R U R' U' until it is.
-                        AddMoveToSolution("R U R' U'", "Keep doing four move sequence until the FRONT RIGHT corner is solved");
+                        AddMoveToSolution("R U R' U'",
+                            captionHeader,
+                            "Do four move sequence until the FRONT RIGHT corner is solved");
                     }
 
                     // Rotate D to stage the next corner
-                    AddMoveToSolution("D", "Rotate the DOWN layer until the next unsolved piece is in the FRONT RIGHT corner");
+                    AddMoveToSolution("D",
+                        captionHeader,
+                        "Do not rotate the whole cube!!\n\nRotate the DOWN layer until the next unsolved piece is in the FRONT / RIGHT corner");
                 }
 
                 // Do final D turn, if necessary
                 while(_cube[Square.F] != _cube[Square.FD])
                 {
-                    AddMoveToSolution("D", "Rotate the DOWN layer until the next unsolved piece is in the FRONT RIGHT corner");
+                    AddMoveToSolution("D",
+                        captionHeader,
+                        "All corners are now done.\n\nRotate the DOWN layer until the cube is solved!");
                 }
             }
         }
@@ -895,7 +916,9 @@ namespace LogicalCube
                 else
                 {
                     // Do F R' D' R to put piece in bottom layer correctly oriented
-                    AddMoveToSolution("F R' D' R", $"Move {pieceString} edge to bottom layer, properly oriented");
+                    AddMoveToSolution("F R' D' R",
+                        currentStep,
+                        $"Move {pieceString} edge to bottom layer, properly oriented");
 
                     // Call this function recursively
                     SolveWhiteCrossPiece(pieceString, destinationSquareIndex, algorithmMoves);
@@ -908,6 +931,7 @@ namespace LogicalCube
 
         private void MoveCubeToStandardOrientation()
         {
+            string currentStep = "0: Get the cube ready";
             // Move white side to UP
             Square whiteSquare = _cube.FindPiece("W");
 
@@ -919,15 +943,15 @@ namespace LogicalCube
                 //AddMoveToSolution("");
             }
             else if (whiteSquare == Square.F)
-                AddMoveToSolution("x", "Rotate cube to put WHITE face UP");
+                AddMoveToSolution("x", currentStep, "Rotate cube to put WHITE face UP");
             else if (whiteSquare == Square.R)
-                AddMoveToSolution("z'", "Rotate cube to put WHITE face UP");
+                AddMoveToSolution("z'", currentStep, "Rotate cube to put WHITE face UP");
             else if (whiteSquare == Square.B)
-                AddMoveToSolution("x'", "Rotate cube to put WHITE face UP");
+                AddMoveToSolution("x'", currentStep, "Rotate cube to put WHITE face UP");
             else if (whiteSquare == Square.L)
-                AddMoveToSolution("z", "Rotate cube to put WHITE face UP");
+                AddMoveToSolution("z", currentStep, "Rotate cube to put WHITE face UP");
             else if (whiteSquare == Square.D)
-                AddMoveToSolution("x2", "Rotate cube to put WHITE face UP");
+                AddMoveToSolution("x2", currentStep, "Rotate cube to put WHITE face UP");
             else
                 throw new Exception("Unable to find white center.");    // SHould never happen - FindPiece() would have thrown.
 
@@ -939,11 +963,11 @@ namespace LogicalCube
                 AddMoveToSolution("");
             }
             else if (greenSquare == Square.R)
-                AddMoveToSolution("y", "Rotate cube to put GREEN face FRONT");
+                AddMoveToSolution("y", currentStep, "Rotate cube to put GREEN face FRONT");
             else if (greenSquare == Square.B)
-                AddMoveToSolution("y2", "Rotate cube to put GREEN face FRONT");
+                AddMoveToSolution("y2", currentStep, "Rotate cube to put GREEN face FRONT");
             else if (greenSquare == Square.L)
-                AddMoveToSolution("y'", "Rotate cube to put GREEN face FRONT");
+                AddMoveToSolution("y'", currentStep, "Rotate cube to put GREEN face FRONT");
             else if (greenSquare == Square.D)
                 throw new Exception("Green center can't be down if white is up.");
             else if (greenSquare == Square.U)
@@ -971,33 +995,33 @@ namespace LogicalCube
 
                 // Add a / unless this is the last entry
                 if ( index < piece.Length - 1)
-                    returnValue += " / ";
+                    returnValue += "/";
             }
             return returnValue;
         }
 
-        private static string GetLocationString(string location)
-        {
-            string returnValue = "";
-
-            for (int index = 0; index < location.Length; index++)
-            {
-                returnValue += location[index] switch
-                {
-                    'U' => "UPPER",
-                    'D' => "DOWN",
-                    'F' => "FRONT",
-                    'B' => "BACK",
-                    'R' => "RIGHT",
-                    'L' => "LEFT",
-                    _ => location[index],
-                };
-
-                // Add a / unless this is the last entry
-                if (index < location.Length - 1)
-                    returnValue += " / ";
-            }
-            return returnValue;
-        }
+        //private static string GetLocationString(string location)
+        //{
+        //    string returnValue = "";
+        //
+        //    for (int index = 0; index < location.Length; index++)
+        //    {
+        //        returnValue += location[index] switch
+        //        {
+        //            'U' => "UPPER",
+        //            'D' => "DOWN",
+        //            'F' => "FRONT",
+        //            'B' => "BACK",
+        //            'R' => "RIGHT",
+        //            'L' => "LEFT",
+        //            _ => location[index],
+        //        };
+        //
+        //        // Add a / unless this is the last entry
+        //        if (index < location.Length - 1)
+        //            returnValue += " / ";
+        //    }
+        //    return returnValue;
+        //}
     }
 }
